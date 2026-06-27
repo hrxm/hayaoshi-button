@@ -12,20 +12,30 @@ function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-// ── 効果音（WebAudio。mp3不要・音源ファイル不要）──────────────────
+// ── 効果音 ───────────────────────────────────────────────────
+// sfx/ フォルダのmp3を使う。読み込めない場合はWebAudioのビープで代替。
+const SFX = {
+  buzz:     'sfx/kaitou-Quiz-Ding_Dong02-2(Fast-Single).mp3',   // 早押し
+  correct:  'sfx/seikai-Quiz-Ding_Dong04-3(Long).mp3',          // 正解
+  wrong:    'sfx/yaji-Slide_Whistle01-6(Overtone-Down).mp3',    // 不正解
+  question: 'sfx/shutsudai-Quiz-Question02-1(Low).mp3',         // 出題
+  results:  'sfx/kekkahappyo-Quiz-Results01-2.mp3',             // 結果発表
+};
+const _audioCache = {};
+function _audio(key) {
+  if (!_audioCache[key]) { const a = new Audio(encodeURI(SFX[key])); a.preload = 'auto'; _audioCache[key] = a; }
+  return _audioCache[key];
+}
 let _audioCtx = null;
 function ctx() {
-  if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  if (_audioCtx.state === 'suspended') _audioCtx.resume();
+  if (!_audioCtx) { try { _audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (_audioCtx && _audioCtx.state === 'suspended') _audioCtx.resume();
   return _audioCtx;
 }
 function beep(freq, durationMs, type = 'sine', gain = 0.2, startAt = 0) {
-  const c = ctx();
-  const o = c.createOscillator();
-  const g = c.createGain();
-  o.type = type;
-  o.frequency.value = freq;
-  g.gain.value = gain;
+  const c = ctx(); if (!c) return;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type; o.frequency.value = freq; g.gain.value = gain;
   o.connect(g).connect(c.destination);
   const t = c.currentTime + startAt;
   o.start(t);
@@ -33,12 +43,16 @@ function beep(freq, durationMs, type = 'sine', gain = 0.2, startAt = 0) {
   g.gain.exponentialRampToValueAtTime(0.0001, t + durationMs / 1000);
   o.stop(t + durationMs / 1000);
 }
-// 早押し音（ブザー風）
-function playBuzz()    { beep(880, 120, 'square', 0.15); beep(660, 140, 'square', 0.15, 0.08); }
-// 正解音（ピンポン）
-function playCorrect() { beep(880, 150, 'sine', 0.25); beep(1320, 350, 'sine', 0.25, 0.15); }
-// 不正解音（ブッブー）
-function playWrong()   { beep(200, 400, 'sawtooth', 0.2); }
+function playSfx(key, fallback) {
+  try {
+    const a = _audio(key).cloneNode(); // 連打で重ねて鳴らせるよう複製
+    a.play().catch(() => { if (fallback) fallback(); });
+  } catch (e) { if (fallback) fallback(); }
+}
+function playBuzz()     { playSfx('buzz',     () => { beep(880,120,'square',0.15); beep(660,140,'square',0.15,0.08); }); }
+function playCorrect()  { playSfx('correct',  () => { beep(880,150,'sine',0.25); beep(1320,350,'sine',0.25,0.15); }); }
+function playWrong()    { playSfx('wrong',    () => beep(200,400,'sawtooth',0.2)); }
+function playQuestion() { playSfx('question'); }
 
 // ── 控えめフラッシュ（目に優しい）──────────────────────────────
 function flash(color = 'rgba(255,215,0,0.15)') {

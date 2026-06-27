@@ -218,10 +218,12 @@
     }
 
     function askQuestion() {
+      ctx();
       const t = document.getElementById('qInput').value;
       roomRef.child('meta/questionText').set(t);
       // 出題したら早押しリセットして受付開始
       roomRef.child('buzz').set(null);
+      playQuestion();
     }
 
     function renderBuzz() {
