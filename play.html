@@ -6,9 +6,10 @@
 <title>早押しボタン</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  body { min-height: 100vh; background: #0d0d14; color: #fff; user-select: none; overflow: hidden;
+  body { min-height: 100vh; background: #0d0d14; color: #fff; user-select: none; overflow-x: hidden; overflow-y: auto;
     font-family: 'Hiragino Sans', 'Yu Gothic', sans-serif;
-    display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 96px 20px 48px; }
   .top { position: fixed; top: 16px; left: 0; right: 0; text-align: center; }
   .room { font-size: 12px; color: rgba(255,255,255,.3); letter-spacing: 3px; }
   .name-tag { font-size: 20px; font-weight: 700; color: rgba(255,255,255,.7);
@@ -55,6 +56,17 @@
   .overlay.wrong .big { color: #ff5252; text-shadow: 0 0 40px rgba(255,82,82,.6); }
   .credit { position: fixed; bottom: 12px; font-size: 10px; color: rgba(255,255,255,.18); }
   .credit a { color: rgba(255,59,59,.3); text-decoration: none; }
+  @media (max-height: 700px) {
+    body { justify-content: flex-start; padding-top: 86px; padding-bottom: 40px; }
+    .qtext { height: 78px; margin-bottom: 14px; }
+    .buzz-btn { width: 210px; height: 210px; font-size: 44px; }
+    .status { margin-top: 22px; }
+    .yaji-btn { margin-top: 16px; }
+  }
+  @media (max-height: 610px) {
+    .buzz-btn { width: 184px; height: 184px; font-size: 38px; }
+    .qtext { height: 58px; }
+  }
 </style>
 </head>
 <body>
