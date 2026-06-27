@@ -58,7 +58,7 @@
   <script src="common.js"></script>
   <script>
     // コードを最初から入れておける: index.html?room=ABCD
-    const pre = param('room').toUpperCase();
+    const pre = sanitizeCode(param('room'));
     if (pre) document.getElementById('code').value = pre;
 
     document.getElementById('name').addEventListener('keydown', e => { if (e.key === 'Enter') join(); });
@@ -67,7 +67,7 @@
     function showErr(msg) { document.getElementById('err').textContent = msg; }
 
     async function join() {
-      const code = document.getElementById('code').value.trim().toUpperCase();
+      const code = sanitizeCode(document.getElementById('code').value);
       const name = document.getElementById('name').value.trim();
       const pw   = document.getElementById('pw').value.trim();
       const btn  = document.getElementById('joinBtn');
