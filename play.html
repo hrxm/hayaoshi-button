@@ -105,7 +105,7 @@
       const r = s.val();
       if (!r || !r.ts || r.ts === lastResultTs) return;
       lastResultTs = r.ts;
-      showResult(r.type, r.name);
+      showResult(r.type, r.name, r.pts);
     });
 
     // ヤジ（全員に同期して鳴らす）
@@ -155,11 +155,11 @@
       });
     }
 
-    function showResult(type, name) {
+    function showResult(type, name, pts) {
       const ov = document.getElementById('overlay');
       document.getElementById('ovBig').textContent = type === 'correct' ? '⭕' : '❌';
       document.getElementById('ovWho').textContent =
-        (name ? name + ' さん' : '') + (type === 'correct' ? ' 正解！ +1点' : ' 残念…');
+        (name ? name + ' さん' : '') + (type === 'correct' ? ' 正解！ +' + (pts||1) + '点' : ' 残念…');
       ov.className = 'overlay show ' + type;
       if (type === 'correct') playCorrect(); else playWrong();
       flash(type === 'correct' ? 'rgba(76,175,80,.15)' : 'rgba(255,82,82,.15)');

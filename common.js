@@ -17,12 +17,11 @@ function escHtml(s) {
 const SFX = {
   buzz:     'sfx/kaitou-Quiz-Ding_Dong02-2(Fast-Single).mp3',   // 早押し
   correct:  'sfx/seikai-Quiz-Ding_Dong04-3(Long).mp3',          // 正解
-  wrong:    'sfx/fuseikai.mp3',                                  // 不正解（※下記参照）
+  wrong:    'sfx/fuseikai - Quiz-Buzzer02-4(Multi).mp3',         // 不正解
   question: 'sfx/shutsudai-Quiz-Question02-1(Low).mp3',         // 出題
   results:  'sfx/kekkahappyo-Quiz-Results01-2.mp3',             // 結果発表
   cheer:    'sfx/Yeah - Cheer-Yay02-2(High-Short-Solo).mp3',    // 歓声
 };
-// ※ 不正解音(fuseikai.mp3)は未配置。sfx/ に置けば自動で鳴り、無ければ合成音で代替。
 // ヤジ（誰でもランダムに飛ばせる野次。回答中／出題中に使う）
 const YAJI_SFX = [
   'sfx/yaji-Slide_Whistle01-5(Overtone-Up).mp3',
