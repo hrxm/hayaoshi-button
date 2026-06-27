@@ -26,6 +26,7 @@
     animation: blink .7s step-end infinite; vertical-align: text-bottom; margin-left: 1px; }
   @keyframes blink { 50% { opacity: 0; } }
 
+  button { touch-action: manipulation; }
   .buzz-btn { width: 240px; height: 240px; border-radius: 50%; border: none; cursor: pointer;
     background: radial-gradient(circle at 35% 32%, #ff7878, #ff1744, #b3001b);
     color: #fff; font-size: 52px; font-weight: 900; letter-spacing: -1px;
@@ -207,9 +208,6 @@
       flash(type === 'correct' ? 'rgba(76,175,80,.15)' : 'rgba(255,82,82,.15)');
       setTimeout(() => { ov.className = 'overlay'; }, 2200);
     }
-
-    // モバイルのダブルタップ拡大防止（リンク以外）
-    document.addEventListener('touchend', e => { if (!e.target.closest('a')) e.preventDefault(); }, { passive: false });
   </script>
 </body>
 </html>
