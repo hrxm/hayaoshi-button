@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>早押しボタン</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    min-height: 100vh; background: #0d0d14;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-family: 'Hiragino Sans', 'Yu Gothic', sans-serif; color: #fff; padding: 20px;
+  }
+  .logo { font-size: 46px; font-weight: 900; color: #ff3b3b;
+    text-shadow: 0 0 30px rgba(255,59,59,.5); letter-spacing: -2px; margin-bottom: 4px; }
+  .subtitle { font-size: 14px; color: rgba(255,255,255,.4); margin-bottom: 36px; letter-spacing:.1em; }
+  .card { background: rgba(255,255,255,.05); border: 1px solid rgba(255,59,59,.25);
+    border-radius: 22px; padding: 32px 28px; width: 340px; max-width: 100%; text-align: center; }
+  .card h2 { font-size: 18px; margin-bottom: 20px; color: rgba(255,255,255,.85); }
+  input { width: 100%; background: rgba(255,255,255,.08); border: 1.5px solid rgba(255,59,59,.3);
+    border-radius: 12px; padding: 14px 16px; font-size: 17px; color: #fff; outline: none;
+    text-align: center; font-family: inherit; margin-bottom: 14px; transition: border-color .2s; }
+  input:focus { border-color: #ff3b3b; }
+  input::placeholder { color: rgba(255,255,255,.25); }
+  #code { text-transform: uppercase; letter-spacing: 6px; font-weight: 900; font-size: 22px; }
+  button { width: 100%; background: linear-gradient(135deg, #ff5252, #ff1744); color: #fff;
+    border: none; border-radius: 12px; padding: 16px; font-size: 18px; font-weight: 900;
+    cursor: pointer; font-family: inherit; box-shadow: 0 4px 20px rgba(255,23,68,.35);
+    transition: transform .1s, box-shadow .2s; }
+  button:active { transform: scale(.97); }
+  button:disabled { opacity:.5; cursor: default; }
+  .err { color: #ff6b6b; font-size: 13px; min-height: 18px; margin-bottom: 8px; }
+  .host-link { margin-top: 24px; font-size: 13px; }
+  .host-link a { color: rgba(255,59,59,.6); text-decoration: none; }
+  .host-link a:hover { color: #ff3b3b; }
+  .credit { position: fixed; bottom: 14px; font-size: 10px; color: rgba(255,255,255,.18);
+    text-align: center; line-height: 1.6; }
+  .credit a { color: rgba(255,59,59,.3); text-decoration: none; }
+</style>
+</head>
+<body>
+  <div class="logo">早押しボタン</div>
+  <div class="subtitle">QUIZ BUZZER</div>
+  <div class="card">
+    <h2>ルームに参加</h2>
+    <input id="code" type="text" placeholder="ルームコード" maxlength="4" autocapitalize="characters" autocomplete="off">
+    <input id="name" type="text" placeholder="あなたの名前" maxlength="20">
+    <input id="pw" type="text" placeholder="パスワード（任意）" maxlength="20" autocomplete="off">
+    <div class="err" id="err"></div>
+    <button id="joinBtn" onclick="join()">参加する！</button>
+  </div>
+  <div class="host-link">出題者の方は <a href="host.html">▶ ルームを作る</a></div>
+  <div class="credit">🎤 by <a href="https://instagram.com/hrxm" target="_blank">@hrxm</a> · 🍸 x-garden · 🇯🇵 Tokyo &copy; 2026</div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="common.js"></script>
+  <script>
+    // コードを最初から入れておける: index.html?room=ABCD
+    const pre = param('room').toUpperCase();
+    if (pre) document.getElementById('code').value = pre;
+
+    document.getElementById('name').addEventListener('keydown', e => { if (e.key === 'Enter') join(); });
+    document.getElementById('pw').addEventListener('keydown', e => { if (e.key === 'Enter') join(); });
+
+    function showErr(msg) { document.getElementById('err').textContent = msg; }
+
+    async function join() {
+      const code = document.getElementById('code').value.trim().toUpperCase();
+      const name = document.getElementById('name').value.trim();
+      const pw   = document.getElementById('pw').value.trim();
+      const btn  = document.getElementById('joinBtn');
+      showErr('');
+      if (!code) return showErr('ルームコードを入れてね');
+      if (!name) return showErr('名前を入れてね');
+
+      btn.disabled = true; btn.textContent = '接続中…';
+      try {
+        const metaSnap = await db.ref('rooms/' + code + '/meta').get();
+        if (!metaSnap.exists()) { btn.disabled = false; btn.textContent = '参加する！'; return showErr('そのルームは見つかりません'); }
+        const meta = metaSnap.val();
+        if (meta.password && meta.password !== pw) { btn.disabled = false; btn.textContent = '参加する！'; return showErr('パスワードが違います'); }
+
+        // プレイヤー登録
+        const playersRef = db.ref('rooms/' + code + '/players');
+        const countSnap = await playersRef.get();
+        const count = countSnap.exists() ? Object.keys(countSnap.val()).length : 0;
+        const emoji = pickEmoji(count);
+        const newRef = playersRef.push();
+        await newRef.set({ name: name, emoji: emoji, score: 0 });
+
+        location.href = 'play.html?room=' + code + '&pid=' + newRef.key;
+      } catch (e) {
+        btn.disabled = false; btn.textContent = '参加する！';
+        showErr('接続エラー: ' + (e.message || e));
+      }
+    }
+  </script>
+</body>
+</html>
