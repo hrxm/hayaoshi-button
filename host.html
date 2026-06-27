@@ -130,6 +130,8 @@
       <button id="createBtn" onclick="createRoom()">ルーム作成！</button>
     </div>
 
+    <div class="card-or">または</div>
+
     <!-- 復帰 -->
     <div class="card2">
       <h2>ルームに戻る（再接続）</h2>
@@ -210,7 +212,7 @@
   <script>
     let code = sanitizeCode(param('room'));
     let roomRef = null, currentBuzz = null, lastResultTs = 0, lastQText = null, lastYajiTs = 0;
-    let historyData = []; // ローカル履歴キャッシュ
+    let currentQNum = 1;
 
     if (code) { startDashboard(); }
 
@@ -227,12 +229,13 @@
       if (usePw && !pw) { alert('パスワードを入れてね'); return; }
       btn.disabled = true; btn.textContent = '作成中…';
       try {
-        let newCode;
+        let newCode = null;
         for (let i = 0; i < 5; i++) {
-          newCode = genRoomCode();
-          const snap = await db.ref('rooms/' + newCode + '/meta').get();
-          if (!snap.exists()) break;
+          const c = genRoomCode();
+          const snap = await db.ref('rooms/' + c + '/meta').get();
+          if (!snap.exists()) { newCode = c; break; }
         }
+        if (!newCode) { alert('ルーム作成に失敗しました。もう一度試してね。'); btn.disabled = false; btn.textContent = 'ルーム作成！'; return; }
         await db.ref('rooms/' + newCode + '/meta').set({
           password: pw, questionNumber: 1, questionText: '', result: null,
           createdAt: firebase.database.ServerValue.TIMESTAMP
@@ -274,7 +277,8 @@
 
       roomRef = db.ref('rooms/' + code);
       roomRef.child('meta/questionNumber').on('value', s => {
-        document.getElementById('qbadge').textContent = '第 ' + (s.val() || 1) + ' 問';
+        currentQNum = s.val() || 1;
+        document.getElementById('qbadge').textContent = '第 ' + currentQNum + ' 問';
       });
       roomRef.child('meta/questionText').on('value', s => {
         const t = s.val() || '';
@@ -358,14 +362,13 @@
     function judge(type) {
       if (!currentBuzz) return;
       ctx();
-      const name = currentBuzz.name, targetId = currentBuzz.id;
+      const name = currentBuzz.name, targetId = sanitizeId(currentBuzz.id);
       const pts = currentPts();
-      const qNum = parseInt(document.getElementById('qbadge').textContent.replace(/[^0-9]/g,'')) || 1;
       if (type === 'correct') {
         roomRef.child('players/' + targetId + '/score').transaction(v => (v || 0) + pts);
         roomRef.child('meta/result').set({ type: 'correct', name, pts, ts: Date.now() });
         // 履歴に追記
-        roomRef.child('history').push({ name, pts, q: qNum, ts: Date.now() });
+        roomRef.child('history').push({ name, pts, q: currentQNum, ts: Date.now() });
       } else {
         roomRef.child('meta/result').set({ type: 'wrong', name, pts: 0, ts: Date.now() });
         roomRef.child('buzz').set(null); // 不正解：全員また押せる

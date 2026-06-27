@@ -148,7 +148,7 @@
 
     function throwYaji() {
       ctx();
-      const i = Math.floor(Math.random() * 3);
+      const i = Math.floor(Math.random() * YAJI_SFX.length);
       roomRef.child('yaji').set({ ts: Date.now(), i: i }); // 鳴らすのはリスナー側（自分含む全員）
     }
 

@@ -94,7 +94,7 @@ function genRoomCode() {
 // ── ルームコードの検証（Firebaseパス事故・インジェクション防止）────
 // 使える文字は genRoomCode と同じ [A-Z2-9] のみ。それ以外は除去。
 function sanitizeCode(s) {
-  return String(s || '').toUpperCase().replace(/[^A-Z2-9]/g, '').slice(0, 4);
+  return String(s || '').toUpperCase().replace(/[^ABCDEFGHJKLMNPQRSTUVWXYZ23456789]/g, '').slice(0, 4);
 }
 // FirebaseのpushキーID（URLセーフ文字のみ）。パストラバーサル防止。
 function sanitizeId(s) {
