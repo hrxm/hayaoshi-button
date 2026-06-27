@@ -7,11 +7,12 @@
 const firebaseConfig = {
   apiKey: "ここに貼る",
   authDomain: "ここに貼る",
-  databaseURL: "ここに貼る", // 例: https://xxxx-default-rtdb.firebaseio.com
+  databaseURL: "ここに貼る",
   projectId: "ここに貼る",
   storageBucket: "ここに貼る",
   messagingSenderId: "ここに貼る",
   appId: "ここに貼る",
+  measurementId: "ここに貼る",
 };
 
 // ↓ これは触らなくてOK
