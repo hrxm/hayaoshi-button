@@ -157,7 +157,8 @@
       <div>
         <div class="panel" style="margin-bottom:16px">
           <h3>問題</h3>
-          <textarea id="qInput" placeholder="問題文（任意）。空のままでもOK → 「第○問」だけ表示"></textarea>
+          <textarea id="qInput" placeholder="問題文（任意）。空のままでもOK → 「第○問」だけ表示" maxlength="100" oninput="document.getElementById('qCharCount').textContent=this.value.length"></textarea>
+          <div style="text-align:right;font-size:11px;color:rgba(255,255,255,.3);margin-top:2px"><span id="qCharCount">0</span>/100</div>
           <div class="pts-row">
             <span>この問題のポイント：</span>
             <input type="number" id="ptsInput" value="1" min="1" max="99">
