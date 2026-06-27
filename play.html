@@ -33,6 +33,10 @@
   .status { margin-top: 30px; font-size: 17px; min-height: 26px; text-align: center; font-weight: 700; }
   .status.answering { color: #ffd54a; }
   .hint { margin-top: 8px; font-size: 12px; color: rgba(255,255,255,.25); }
+  .yaji-btn { margin-top: 22px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,213,74,.4);
+    color: #ffd54a; border-radius: 999px; padding: 11px 22px; font-size: 15px; font-weight: 700;
+    cursor: pointer; font-family: inherit; transition: transform .08s; }
+  .yaji-btn:active { transform: scale(.94); }
 
   .overlay { position: fixed; inset: 0; display: flex; flex-direction: column;
     align-items: center; justify-content: center; gap: 14px; z-index: 50;
@@ -57,6 +61,7 @@
   <button class="buzz-btn" id="buzzBtn">押す！</button>
   <div class="status" id="status"></div>
   <div class="hint" id="hint">早く押した人だけが回答できるよ</div>
+  <button class="yaji-btn" id="yajiBtn" onclick="throwYaji()">🗣️ ヤジを飛ばす</button>
 
   <div class="overlay" id="overlay"><div class="big" id="ovBig"></div><div class="who" id="ovWho"></div></div>
   <div class="credit">🎤 by <a href="https://instagram.com/hrxm" target="_blank">@hrxm</a> · 🍸 x-garden</div>
@@ -66,13 +71,13 @@
   <script src="firebase-config.js"></script>
   <script src="common.js"></script>
   <script>
-    const code = param('room').toUpperCase();
-    const pid  = param('pid');
+    const code = sanitizeCode(param('room'));
+    const pid  = sanitizeId(param('pid'));
     if (!code || !pid) location.href = 'index.html';
     document.getElementById('roomCode').textContent = 'ROOM ' + code;
 
     const roomRef = db.ref('rooms/' + code);
-    let myName = '', myEmoji = '', currentBuzz = null, lastResultTs = 0;
+    let myName = '', myEmoji = '', currentBuzz = null, lastResultTs = 0, lastYajiTs = 0;
 
     // 自分の情報＆得点
     roomRef.child('players/' + pid).on('value', s => {
@@ -102,6 +107,20 @@
       lastResultTs = r.ts;
       showResult(r.type, r.name);
     });
+
+    // ヤジ（全員に同期して鳴らす）
+    roomRef.child('yaji').on('value', s => {
+      const y = s.val();
+      if (!y || !y.ts || y.ts === lastYajiTs) return;
+      lastYajiTs = y.ts;
+      playYaji(y.i);
+    });
+
+    function throwYaji() {
+      ctx();
+      const i = Math.floor(Math.random() * 3);
+      roomRef.child('yaji').set({ ts: Date.now(), i: i }); // 鳴らすのはリスナー側（自分含む全員）
+    }
 
     function renderBuzz() {
       const btn = document.getElementById('buzzBtn');

@@ -17,10 +17,18 @@ function escHtml(s) {
 const SFX = {
   buzz:     'sfx/kaitou-Quiz-Ding_Dong02-2(Fast-Single).mp3',   // 早押し
   correct:  'sfx/seikai-Quiz-Ding_Dong04-3(Long).mp3',          // 正解
-  wrong:    'sfx/yaji-Slide_Whistle01-6(Overtone-Down).mp3',    // 不正解
+  wrong:    'sfx/fuseikai.mp3',                                  // 不正解（※下記参照）
   question: 'sfx/shutsudai-Quiz-Question02-1(Low).mp3',         // 出題
   results:  'sfx/kekkahappyo-Quiz-Results01-2.mp3',             // 結果発表
+  cheer:    'sfx/Yeah - Cheer-Yay02-2(High-Short-Solo).mp3',    // 歓声
 };
+// ※ 不正解音(fuseikai.mp3)は未配置。sfx/ に置けば自動で鳴り、無ければ合成音で代替。
+// ヤジ（誰でもランダムに飛ばせる野次。回答中／出題中に使う）
+const YAJI_SFX = [
+  'sfx/yaji-Slide_Whistle01-5(Overtone-Up).mp3',
+  'sfx/yaji-Slide_Whistle01-6(Overtone-Down).mp3',
+  'sfx/yajiTambourine04-01(Hit-Hand).mp3',
+];
 const _audioCache = {};
 function _audio(key) {
   if (!_audioCache[key]) { const a = new Audio(encodeURI(SFX[key])); a.preload = 'auto'; _audioCache[key] = a; }
@@ -53,6 +61,13 @@ function playBuzz()     { playSfx('buzz',     () => { beep(880,120,'square',0.15
 function playCorrect()  { playSfx('correct',  () => { beep(880,150,'sine',0.25); beep(1320,350,'sine',0.25,0.15); }); }
 function playWrong()    { playSfx('wrong',    () => beep(200,400,'sawtooth',0.2)); }
 function playQuestion() { playSfx('question'); }
+// ヤジを鳴らす（i省略でランダム）。戻り値は使ったインデックス（同期用）
+function playYaji(i) {
+  const idx = (typeof i === 'number') ? (i % YAJI_SFX.length) : Math.floor(Math.random() * YAJI_SFX.length);
+  try { const a = new Audio(encodeURI(YAJI_SFX[idx])); a.play().catch(() => beep(440,180,'triangle',0.18)); }
+  catch (e) { beep(440,180,'triangle',0.18); }
+  return idx;
+}
 
 // ── 控えめフラッシュ（目に優しい）──────────────────────────────
 function flash(color = 'rgba(255,215,0,0.15)') {
@@ -75,6 +90,16 @@ function genRoomCode() {
   let s = '';
   for (let i = 0; i < 4; i++) s += chars[Math.floor(Math.random() * chars.length)];
   return s;
+}
+
+// ── ルームコードの検証（Firebaseパス事故・インジェクション防止）────
+// 使える文字は genRoomCode と同じ [A-Z2-9] のみ。それ以外は除去。
+function sanitizeCode(s) {
+  return String(s || '').toUpperCase().replace(/[^A-Z2-9]/g, '').slice(0, 4);
+}
+// FirebaseのpushキーID（URLセーフ文字のみ）。パストラバーサル防止。
+function sanitizeId(s) {
+  return String(s || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 40);
 }
 
 // ── URLパラメータ取得 ────────────────────────────────────────

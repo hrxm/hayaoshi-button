@@ -143,8 +143,8 @@
   <script src="firebase-config.js"></script>
   <script src="common.js"></script>
   <script>
-    let code = param('room').toUpperCase();
-    let roomRef = null, currentBuzz = null, lastResultTs = 0, lastQText = null;
+    let code = sanitizeCode(param('room'));
+    let roomRef = null, currentBuzz = null, lastResultTs = 0, lastQText = null, lastYajiTs = 0;
 
     if (code) { startDashboard(); }
 
@@ -200,6 +200,11 @@
         lastResultTs = r.ts; showResult(r.type, r.name);
       });
       roomRef.child('players').on('value', s => renderScoreboard(s.val() || {}));
+      roomRef.child('yaji').on('value', s => {
+        const y = s.val();
+        if (!y || !y.ts || y.ts === lastYajiTs) return;
+        lastYajiTs = y.ts; playYaji(y.i);
+      });
     }
 
     // 問題文を1文字ずつ流す
