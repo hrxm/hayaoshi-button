@@ -1,3 +1,7 @@
+<a name="top"></a>
+
+![早押しボタン banner](banner.svg)
+
 # 早押しボタン / Hayaoshi Button 🔴
 
 **日本語** | [English](#english)
