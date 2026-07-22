@@ -2,3 +2,10 @@ node_modules/
 
 .DS_Store
 */.DS_Store
+
+# Firebase config — 実キーが入るため git 管理外
+firebase-config.js
+
+# Claude メモリ・ログ
+.remember/
+docs/superpowers/
