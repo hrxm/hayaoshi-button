@@ -1,97 +1,76 @@
-# 🔴 早押しボタン (Hayaoshi Button)
+# 早押しボタン / Hayaoshi Button 🔴
 
-クイズ番組みたいな早押しボタンを、みんなのスマホで遊べるWebアプリ。
-**サーバー不要**（GitHub Pages + Firebase）。
+**日本語** | [English](#english)
 
-- 📱 回答者：スマホで大きい赤ボタンを押す → 最初の1人だけが回答できる
-- 📺 出題者：中央スクリーンで問題を出し、◯／✗を判定。得点が自動でつく
+リアルタイムのクイズ早押しボタンをみんなのスマホで。サーバー不要、GitHub Pages と Firebase だけで動きます。
 
----
+> 出題者が `host.html` を開いてルームを作成 → 回答者が `index.html` でコードを入力して参加 → 赤いボタンを押す！
 
-## 必要なもの
-- Google アカウント（Firebase 用・無料）
-- GitHub アカウント（公開用・無料）
+## 特徴
 
-所要時間：**約10〜15分**
+- **早押しロック** — 最初の1人だけが回答権を獲得（Firebase トランザクションで同時押し対応）
+- **問題文ストリーミング** — 1文字ずつ流れる演出が全員の画面に同期
+- **得点・履歴管理** — 問題ごとにポイントを設定、正解履歴をリアルタイム記録
+- **ヤジ機能** — 誰でも全員の画面に野次サウンドを飛ばせる
+- **セッション復帰** — 出題者がページを離れてもルームコードで再接続
+- **サーバー不要** — 静的ファイルのみ、GitHub Pages で公開可能
 
----
+## ファイル構成
 
-## ① Firebase をセットアップ（5分）
+| ファイル | 役割 |
+|---|---|
+| `index.html` | 回答者の参加画面 |
+| `play.html` | 回答者の早押しボタン画面 |
+| `host.html` | 出題者・中央スクリーン（操作 + 表示） |
+| `common.js` | 効果音・絵文字・演出など共通処理 |
+| `firebase-config.example.js` | Firebase 設定テンプレート |
+| `sfx/` | クイズ効果音（CC BY 4.0） |
 
-1. https://console.firebase.google.com/ を開く
-2. 「**プロジェクトを追加**」→ 名前は何でもOK（例 `hayaoshi`）→ Google アナリティクスは**オフでOK** →作成
-3. 左メニュー「**構築 → Realtime Database**」→「**データベースを作成**」
-   - ロケーションはそのままでOK
-   - セキュリティルールは「**テストモードで開始**」を選択（あとで下の④で設定します）
-4. 左上の歯車 ⚙️ →「**プロジェクトの設定**」→ 下にスクロールして「**マイアプリ**」
-5. **`</>`（ウェブ）アイコン**をクリック → アプリのニックネームを入れて「アプリを登録」
-6. 表示される `firebaseConfig = { ... }` の中身をコピー
+## セットアップ
 
-7. このプロジェクトの **`firebase-config.js`** を開いて、`firebaseConfig` の中身を貼り替える：
+### 1. Firebase を準備する（5分）
 
-```js
-const firebaseConfig = {
-  apiKey: "AIza...",
-  authDomain: "hayaoshi-xxxx.firebaseapp.com",
-  databaseURL: "https://hayaoshi-xxxx-default-rtdb.firebaseio.com", // ← Realtime DBのURL
-  projectId: "hayaoshi-xxxx",
-  storageBucket: "hayaoshi-xxxx.appspot.com",
-  messagingSenderId: "1234567890",
-  appId: "1:1234567890:web:abcdef",
-};
-```
+1. [Firebase Console](https://console.firebase.google.com/) でプロジェクトを作成
+2. **Realtime Database** を作成（ロケーションはデフォルトでOK、テストモードで開始）
+3. プロジェクト設定 → マイアプリ → ウェブアプリを追加 → `firebaseConfig` をコピー
 
-> ⚠️ `databaseURL` が config に無い場合は、Realtime Database の画面の上部に表示されている
-> `https://....firebaseio.com` をコピーして貼ってください。
-
----
-
-## ② ローカルで試す（任意・1分）
-
-ファイルをダブルクリックでもだいたい動きますが、確実に動かすなら：
+### 2. 設定ファイルを作成する
 
 ```bash
-cd ~/Documents/Hayaoshi-button
+cp firebase-config.example.js firebase-config.js
+```
+
+`firebase-config.js` を開き、`firebaseConfig` の中身をコピーした値に書き換える。
+
+> [!IMPORTANT]
+> `firebase-config.js` は `.gitignore` 済みです。**絶対に GitHub にコミットしないでください。**
+
+### 3. ローカルで動作確認する
+
+```bash
 python3 -m http.server 8000
 ```
 
-ブラウザで:
-- 出題者：`http://localhost:8000/host.html`
-- 回答者：`http://localhost:8000/index.html`（別タブ／別端末）
+| 役割 | URL |
+|---|---|
+| 出題者 | http://localhost:8000/host.html |
+| 回答者 | http://localhost:8000/index.html |
 
----
-
-## ③ GitHub Pages で公開（5分）
-
-1. GitHub で新しいリポジトリを作る（例 `hayaoshi-button`、Public）
-2. このフォルダのファイルを全部アップロード（またはpush）：
+### 4. GitHub Pages で公開する
 
 ```bash
-cd ~/Documents/Hayaoshi-button
-git add .
-git commit -m "早押しボタン MVP"
-git branch -M main
-git remote add origin https://github.com/＜あなた＞/hayaoshi-button.git
+git remote add origin https://github.com/<yourname>/hayaoshi-button.git
 git push -u origin main
 ```
 
-3. リポジトリの **Settings → Pages** →
-   - **Source: Deploy from a branch**
-   - **Branch: main / (root)** → Save
-4. 数分待つと `https://＜あなた＞.github.io/hayaoshi-button/` で公開されます
+リポジトリの **Settings → Pages → Branch: main / (root)** を選択して Save。数分後に公開されます。
 
-公開URL：
-- 出題者／中央スクリーン：`.../host.html`
-- 回答者：`.../index.html`（トップ）
+> [!WARNING]
+> GitHub Pages にデプロイしても `firebase-config.js` はアップロードされないため、Pages URL から Firebase への接続はできません。パーティなどの一時利用であればローカルサーバー運用が最もシンプルです。
 
----
+### 5. Firebase セキュリティルール
 
-## ④ Firebase のセキュリティルール（おすすめ）
-
-「テストモード」は約30日で読み書きできなくなります。パーティ用途なら下記でOK
-（誰でも読み書きできる簡易ルール。本格運用ならコード単位で絞ってください）：
-
-Realtime Database →「ルール」タブに貼り付けて公開：
+テストモードは約30日で期限切れになります。Realtime Database の **ルール** タブに以下を貼り付けてください。
 
 ```json
 {
@@ -102,48 +81,119 @@ Realtime Database →「ルール」タブに貼り付けて公開：
 }
 ```
 
----
-
 ## 遊び方
 
-1. 出題者が `host.html` を開く →「ルーム作成」→ **4桁コード**が出る（パスワードは任意）
-2. みんなは `index.html` を開く → **コード**と**名前**を入れて参加
-3. 出題者が（必要なら）問題文を入れて「📢 この問題を出す」→ 文字が流れて表示
-4. 回答者が赤ボタンを押す → **最初の1人だけ**ロック、「◯◯さんが回答中」
-5. 出題者が **⭕正解（+1点）** か **❌不正解（全員また押せる）** を判定
-6. 「▶ 次の問題へ」で次へ。得点はランキングに自動反映
+1. 出題者が `host.html` を開いて **「ルーム作成！」** → 4桁のコードが表示される
+2. 回答者が `index.html` を開いて **コード** と **名前** を入力して参加
+3. 出題者が問題文を入力して **「📢 この問題を出す（流す）」** → 文字が全員の画面に流れる
+4. 回答者が赤いボタンを押す → **最初の1人だけ** ロックされ「○○さんが回答中」
+5. 出題者が **⭕ 正解** / **❌ 不正解** / **↩ キャンセル** を選択
+6. **「▶ 次の問題へ」** で次へ。得点はリアルタイムでランキングに反映
+
+## 音源クレジット
+
+`sfx/` フォルダの効果音は **CC BY 4.0** ライセンスで利用しています。再配布・公開の際はライセンス表示が必要です。
 
 ---
 
-## ファイル構成
-| ファイル | 役割 |
+<a name="english"></a>
+
+# Hayaoshi Button 🔴
+
+[日本語](#top) | **English**
+
+A real-time quiz buzzer for everyone's smartphone. No server required — runs entirely on GitHub Pages and Firebase.
+
+> Host opens `host.html` and creates a room → Players open `index.html`, enter the room code and name → Hit the big red button!
+
+## Features
+
+- **Buzz lock** — Only the first player to press wins the answer slot (Firebase transaction handles simultaneous presses)
+- **Question streaming** — Text appears character by character, synced to all screens in real time
+- **Scoring & history** — Set points per question; correct answers are logged automatically
+- **Heckle (ヤジ)** — Anyone can trigger a sound effect on all screens at any time
+- **Session recovery** — Host can reconnect to an active room using the room code
+- **No server** — Static files only; deployable to GitHub Pages
+
+## File structure
+
+| File | Purpose |
 |---|---|
-| `index.html` | 回答者の参加画面 |
-| `play.html` | 回答者の早押しボタン画面 |
-| `host.html` | 出題者＝中央スクリーン（操作＋表示） |
-| `common.js` | 絵文字・効果音・演出など共通処理 |
-| `firebase-config.js` | ★あなたのFirebase設定を貼る場所 |
-| `sfx/` | クイズ効果音（早押し・正解・出題・ヤジ 等）|
+| `index.html` | Player join screen |
+| `play.html` | Player buzzer screen |
+| `host.html` | Host / central display (controls + scoreboard) |
+| `common.js` | Shared: sound effects, emoji assignment, utilities |
+| `firebase-config.example.js` | Firebase config template |
+| `sfx/` | Quiz sound effects (CC BY 4.0) |
 
-効果音は `common.js` の `SFX` / `YAJI_SFX` で割り当てています。差し替えたい場合はファイル名を変更するだけ。
+## Setup
 
-- **不正解音**：`sfx/fuseikai.mp3` を置くと鳴ります（未配置なら合成音で代替）。
-- **ヤジ**：回答中・出題中に**誰でも**「🗣️ ヤジを飛ばす」ボタンでランダムに野次を全員へ。
+### 1. Create a Firebase project (5 min)
 
-### 🎵 音源クレジット（CC BY 4.0）
-効果音は **クリエイティブ・コモンズ 表示 4.0 国際（CC BY 4.0）** で利用しています。
-（再配布・公開時はライセンスに従い、提供元のクレジットを表示してください）
+1. Go to [Firebase Console](https://console.firebase.google.com/) and create a project
+2. Add a **Realtime Database** (default location, start in test mode)
+3. Go to Project Settings → Your apps → Add web app → copy the `firebaseConfig` object
+
+### 2. Create your config file
+
+```bash
+cp firebase-config.example.js firebase-config.js
+```
+
+Open `firebase-config.js` and replace the placeholder values with your Firebase config.
+
+> [!IMPORTANT]
+> `firebase-config.js` is listed in `.gitignore`. **Never commit it to GitHub.**
+
+### 3. Run locally
+
+```bash
+python3 -m http.server 8000
+```
+
+| Role | URL |
+|---|---|
+| Host | http://localhost:8000/host.html |
+| Players | http://localhost:8000/index.html |
+
+### 4. Deploy to GitHub Pages
+
+```bash
+git remote add origin https://github.com/<yourname>/hayaoshi-button.git
+git push -u origin main
+```
+
+Go to **Settings → Pages → Branch: main / (root)** and click Save. Your app will be live within a few minutes.
+
+> [!WARNING]
+> `firebase-config.js` is not pushed to GitHub, so the Pages deployment cannot connect to Firebase. For temporary use (e.g. a party), running a local server is the simplest option.
+
+### 5. Firebase Security Rules
+
+Test mode expires after ~30 days. Paste the following into the **Rules** tab of your Realtime Database:
+
+```json
+{
+  "rules": {
+    ".read": true,
+    ".write": true
+  }
+}
+```
+
+## How to play
+
+1. Host opens `host.html` → clicks **「ルーム作成！」** → a 4-character room code appears
+2. Players open `index.html` → enter the **code** and their **name** → join
+3. Host types a question and clicks **「📢 この問題を出す」** → text streams to all screens
+4. Players tap the red button → **only the first press** locks in; others see "○○ is answering"
+5. Host selects **⭕ Correct** / **❌ Wrong** / **↩ Cancel**
+6. **「▶ 次の問題へ」** advances to the next question; scores update live
+
+## Sound credits
+
+Sound effects in `sfx/` are used under the **Creative Commons Attribution 4.0 International (CC BY 4.0)** license. Attribution is required for redistribution.
 
 ---
 
-## 将来やりたいこと（後回し）
-- Excel/CSV で問題をアップロードして出題者が選んで流す
-- 回答制限時間、ラウンド数設定、音の切替
-- 不正解した人をその問題だけロックする方式
-
-🎤 by [@hrxm](https://instagram.com/hrxm) · 🍸 x-garden · 🇯🇵 Tokyo &copy; 2026
-
----
-### メモ（セキュリティ）
-CDNから読む `firebase-*.js` に `integrity`（SRI）を付けるとより安全ですが、
-バージョン更新のたびにハッシュ更新が必要なため、本MVPでは省略しています。
+🎤 by [@hrxm](https://instagram.com/hrxm) · 🍸 x-garden · Tokyo
