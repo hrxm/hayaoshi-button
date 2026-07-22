@@ -84,10 +84,10 @@
 
         // プレイヤー登録
         const playersRef = db.ref('rooms/' + code + '/players');
-        const countSnap = await playersRef.get();
-        const count = countSnap.exists() ? Object.keys(countSnap.val()).length : 0;
-        const emoji = pickEmoji(count);
         const newRef = playersRef.push();
+        // push key の末尾バイトからemojiを決定 → 同時参加でも衝突しない
+        const keySum = newRef.key.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+        const emoji = pickEmoji(keySum);
         await newRef.set({ name: name, emoji: emoji, score: 0 });
 
         location.href = 'play.html?room=' + code + '&pid=' + newRef.key;
