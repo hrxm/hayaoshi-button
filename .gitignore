@@ -30,3 +30,4 @@ docs/
 *.plan.md
 CLAUDE.md
 AGENTS.md
+.vercel
