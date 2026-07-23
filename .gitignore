@@ -22,6 +22,11 @@ dist-ssr/
 # Claude メモリ・ログ・内部ドキュメント（設計書・計画書など公開リポジトリに含めない）
 .remember/
 .claude/
+.agents/
+.ai/
+.codex/
+.cursor/
 docs/
 *.plan.md
 CLAUDE.md
+AGENTS.md

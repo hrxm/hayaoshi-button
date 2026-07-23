@@ -58,8 +58,9 @@ export function Join() {
 
   return (
     <div className={styles.page}>
+      <div className={styles.pretitle}>みんなでクイズ！</div>
       <div className={styles.logo}>早押しボタン</div>
-      <div className={styles.subtitle}>QUIZ BUZZER</div>
+      <div className={styles.subtitle}>LIVE QUIZ BUZZER</div>
       <div className={styles.card}>
         <h2>ルームに参加</h2>
         <input

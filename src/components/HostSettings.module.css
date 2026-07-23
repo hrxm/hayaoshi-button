@@ -1,0 +1,45 @@
+.settings {
+  margin-bottom: 16px;
+  border: 1px solid var(--fg-10);
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--fg-05);
+}
+
+.toggle {
+  width: 100%;
+  padding: 13px 16px;
+  border: 0;
+  background: transparent;
+  color: var(--fg-70);
+  text-align: left;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.body {
+  border-top: 1px solid var(--fg-10);
+  padding: 14px 16px;
+  display: grid;
+  gap: 13px;
+  color: var(--fg-70);
+  font-size: 14px;
+}
+
+.body label {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.cooldown input {
+  width: 72px;
+  padding: 7px;
+  margin-left: auto;
+  border: 1px solid var(--fg-18);
+  border-radius: 8px;
+  background: var(--fg-06);
+  color: var(--fg);
+  font-size: 16px;
+  text-align: center;
+}

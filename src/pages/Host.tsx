@@ -1,12 +1,31 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { child, get, push, runTransaction, set } from 'firebase/database';
-import { sanitizeCode, sanitizeId } from '../lib/room';
+import { get, push, runTransaction, set, update } from 'firebase/database';
+import { sanitizeCode } from '../lib/room';
 import { useRoomRef, useChildRef } from '../hooks/useRoomRef';
 import { useRoomValue } from '../hooks/useRoomValue';
 import { useRoomEvent } from '../hooks/useRoomEvent';
 import { usePlayers } from '../hooks/usePlayers';
-import { playCorrect, playQuestion, playWrong, playYaji, flash, unlockAudio } from '../lib/sfx';
+import { useHostShortcuts } from '../hooks/useHostShortcuts';
+import {
+  playCorrect,
+  playQuestion,
+  playWrong,
+  playYaji,
+  flash,
+  setSoundEnabled,
+  unlockAudio,
+} from '../lib/sfx';
+import {
+  applyCancelBuzz,
+  applyCorrectJudgment,
+  applyFullReset,
+  applyNextQuestion,
+  applyWrongJudgment,
+  getBuzzToken,
+  type TransactionRoom,
+} from '../lib/roomState';
+import { normalizeRoomSettings } from '../lib/preferences';
 import { ResultOverlay } from '../components/ResultOverlay';
 import { ConnectionBadge } from '../components/ConnectionBadge';
 import { RoomCreate } from '../components/RoomCreate';
@@ -14,10 +33,13 @@ import { RoomRejoin } from '../components/RoomRejoin';
 import { HostControls } from '../components/HostControls';
 import { Scoreboard } from '../components/Scoreboard';
 import { HistoryList } from '../components/HistoryList';
-import type { Buzz, HistoryMap, Result, Yaji } from '../types';
+import { HostSettings } from '../components/HostSettings';
+import { RemoteControls } from '../components/RemoteControls';
+import type { AwardsMap, Buzz, HistoryMap, Result, RoomSettings, Yaji } from '../types';
 import styles from './Host.module.css';
 
 const LAST_ROOM_KEY = 'lastRoom';
+const HOST_SOUND_KEY = 'hayaoshiHostSound';
 
 // 旧 host.html の移植。出題者・中央スクリーン画面。
 export function Host() {
@@ -46,6 +68,7 @@ function HostCreateView() {
   return (
     <div className={styles.page}>
       <div className={styles.createWrap}>
+        <div className={styles.createPretitle}>みんなでクイズ！</div>
         <div className={styles.logo}>早押しボタン</div>
         <div className={styles.subtitle}>出題者ページ / 中央スクリーン</div>
         <RoomCreate onCreated={goToRoom} />
@@ -57,7 +80,9 @@ function HostCreateView() {
 }
 
 function HostDashboard({ code }: { code: string }) {
+  const [searchParams, setSearchParams] = useSearchParams();
   const roomRef = useRoomRef(code);
+  const remoteView = searchParams.get('view') === 'remote';
 
   useEffect(() => {
     // 前回のルームコードをlocalStorageに保存（再接続用）
@@ -70,11 +95,30 @@ function HostDashboard({ code }: { code: string }) {
   const qTextRef = useChildRef(roomRef, 'meta/questionText');
   const qText = useRoomValue<string>(qTextRef, '');
 
+  const qPointsRef = useChildRef(roomRef, 'meta/questionPoints');
+  const qPoints = useRoomValue<number>(qPointsRef, 1);
+
   const buzzRef = useChildRef(roomRef, 'buzz');
   const buzz = useRoomValue<Buzz | null>(buzzRef, null);
 
   const historyRef = useChildRef(roomRef, 'history');
   const history = useRoomValue<HistoryMap>(historyRef, {});
+
+  const awardsRef = useChildRef(roomRef, 'awards');
+  const awards = useRoomValue<AwardsMap>(awardsRef, {});
+  const questionScored = !!awards[String(qNum)];
+
+  const settingsRef = useChildRef(roomRef, 'meta/settings');
+  const rawSettings = useRoomValue<Partial<RoomSettings>>(settingsRef, {});
+  const roomSettings = useMemo(() => normalizeRoomSettings(rawSettings), [rawSettings]);
+
+  const [hostSoundEnabled, setHostSoundEnabled] = useState(
+    () => localStorage.getItem(HOST_SOUND_KEY) !== 'false'
+  );
+  useEffect(() => {
+    setSoundEnabled(hostSoundEnabled);
+    localStorage.setItem(HOST_SOUND_KEY, String(hostSoundEnabled));
+  }, [hostSoundEnabled]);
 
   const resultRef = useChildRef(roomRef, 'meta/result');
   const [resultDisplay, setResultDisplay] = useState<(Result & { visible: boolean }) | null>(null);
@@ -95,59 +139,75 @@ function HostDashboard({ code }: { code: string }) {
   // 正規表現でURLを組み立てていたため、host.html という拡張子付きパスが無い環境（Vercelの
   // クリーンなルーティングなど）で壊れていた。ルーターのオリジンから直接組み立てる。
   const joinUrl = `${window.location.origin}/?room=${code}`;
+  const remoteUrl = `${window.location.origin}/host?room=${code}&view=remote`;
   const [urlCopied, setUrlCopied] = useState(false);
+  const [remoteCopied, setRemoteCopied] = useState(false);
 
-  function askQuestion(text: string) {
-    if (!qTextRef || !buzzRef) return;
+  const runRoomTransaction = useCallback(
+    async (transition: (current: TransactionRoom | null) => TransactionRoom | null) => {
+      if (!roomRef) return;
+      const seed = (await get(roomRef)).val() as TransactionRoom | null;
+      return runTransaction(roomRef, (current: TransactionRoom | null) => {
+        return transition(current ?? seed) ?? undefined;
+      });
+    },
+    [roomRef]
+  );
+
+  function askQuestion(text: string, points: number) {
+    if (!roomRef) return;
     unlockAudio();
-    set(qTextRef, text);
-    set(buzzRef, null); // 早押し受付開始
+    update(roomRef, {
+      'meta/questionText': text,
+      'meta/questionPoints': Math.max(1, points || 1),
+      buzz: null,
+    });
     playQuestion();
   }
 
-  function judge(type: 'correct' | 'wrong', pts: number) {
-    if (!buzz || !resultRef || !buzzRef || !historyRef || !roomRef) return;
-    unlockAudio();
-    const targetId = sanitizeId(buzz.id);
-    if (type === 'correct') {
-      runTransaction(child(roomRef, 'players/' + targetId + '/score'), (v) => (v || 0) + pts);
-      set(resultRef, { type: 'correct', name: buzz.name, pts, ts: Date.now() });
-      // 履歴に追記
-      push(historyRef, { name: buzz.name, pts, q: qNum, ts: Date.now() });
-    } else {
-      set(resultRef, { type: 'wrong', name: buzz.name, pts: 0, ts: Date.now() });
-      set(buzzRef, null); // 不正解：全員また押せる
-    }
-  }
+  const judge = useCallback(
+    (type: 'correct' | 'wrong', pts = qPoints) => {
+      if (!buzz || !historyRef || !roomRef) return;
+      unlockAudio();
+      const expectedBuzzToken = getBuzzToken(buzz);
+      const now = Date.now();
+      const historyKey = push(historyRef).key;
+      if (!historyKey) return;
+      runRoomTransaction((current) => {
+        if (type === 'correct') {
+          const input = {
+            expectedBuzzToken,
+            questionNumber: qNum,
+            points: pts,
+            historyKey,
+            now,
+          };
+          return applyCorrectJudgment(current, input);
+        }
+        return applyWrongJudgment(current, expectedBuzzToken, now);
+      });
+    },
+    [buzz, historyRef, qNum, qPoints, roomRef, runRoomTransaction]
+  );
 
   function cancelBuzz() {
-    if (buzzRef) set(buzzRef, null);
+    if (!buzzRef || !buzz) return;
+    const expectedBuzzToken = getBuzzToken(buzz);
+    runTransaction(buzzRef, (current: Buzz | null) => {
+      const next = applyCancelBuzz(current, expectedBuzzToken);
+      return next === current ? undefined : next;
+    });
   }
 
-  function nextQuestion() {
-    if (!buzzRef || !resultRef || !qTextRef || !qNumRef) return;
-    set(buzzRef, null);
-    set(resultRef, null);
-    set(qTextRef, '');
-    runTransaction(qNumRef, (v) => (v || 1) + 1);
-  }
+  const nextQuestion = useCallback(() => {
+    if (!roomRef) return;
+    runRoomTransaction((current) => applyNextQuestion(current, qNum));
+  }, [qNum, roomRef, runRoomTransaction]);
 
   function resetAll() {
     if (!confirm('全員の得点を0に戻し、履歴も消去しますか？')) return;
-    if (!roomRef || !buzzRef || !resultRef || !qTextRef || !qNumRef || !historyRef) return;
-    get(child(roomRef, 'players')).then((s) => {
-      const players = (s.val() as Record<string, unknown>) || {};
-      Object.keys(players).forEach((id) => {
-        // 安定化: 旧実装は .set(0) で直接上書きしていたが、判定処理と同じくtransactionに揃える
-        // （進行中の judge() 更新と競合しないように）。
-        runTransaction(child(roomRef, 'players/' + id + '/score'), () => 0);
-      });
-    });
-    set(buzzRef, null);
-    set(resultRef, null);
-    set(qTextRef, '');
-    set(qNumRef, 1);
-    set(historyRef, null);
+    if (!roomRef) return;
+    runRoomTransaction((current) => (current ? applyFullReset(current) : null));
   }
 
   function clearHistory() {
@@ -155,12 +215,35 @@ function HostDashboard({ code }: { code: string }) {
     if (historyRef) set(historyRef, null);
   }
 
+  function updateRoomSettings(next: Partial<RoomSettings>) {
+    if (settingsRef) update(settingsRef, next);
+  }
+
+  function setRemoteView(enabled: boolean) {
+    const next = new URLSearchParams(searchParams);
+    if (enabled) next.set('view', 'remote');
+    else next.delete('view');
+    setSearchParams(next);
+  }
+
+  useHostShortcuts({
+    canCorrect: !!buzz && !questionScored,
+    canWrong: !!buzz,
+    onCorrect: useCallback(() => judge('correct', qPoints), [judge, qPoints]),
+    onWrong: useCallback(() => judge('wrong', qPoints), [judge, qPoints]),
+    onNext: nextQuestion,
+  });
+
   return (
     <div className={styles.page}>
       <ConnectionBadge />
       <header className={styles.header}>
+        <div className={styles.brand}>
+          <span>みんなでクイズ！</span>
+          <strong>早押しボタン</strong>
+        </div>
         <div className={styles.roomInfo}>
-          <div className={styles.roomCode}>{code}</div>
+          <div className={styles.roomCode}>ROOM {code}</div>
           <button
             className={styles.joinUrl}
             onClick={() => copyJoinUrl(joinUrl, setUrlCopied)}
@@ -169,22 +252,63 @@ function HostDashboard({ code }: { code: string }) {
             参加URL: <b>{joinUrl}</b> {urlCopied ? '✅ コピー済み' : '📋'}
           </button>
         </div>
-        <div className={styles.qbadge}>第 {qNum} 問</div>
         <div className={styles.toolbar}>
-          <button className={styles.btnGhost} onClick={resetAll}>
-            🔄 全リセット
+          <button className={styles.btnGhost} onClick={() => setRemoteView(!remoteView)}>
+            {remoteView ? '全画面管理に戻る' : '📱 リモコン表示'}
           </button>
+          {!remoteView && (
+            <button className={styles.btnGhost} onClick={resetAll}>
+              🔄 全リセット
+            </button>
+          )}
         </div>
       </header>
 
+      {remoteView ? (
+        <>
+          <RemoteControls
+            questionNumber={qNum}
+            questionText={qText}
+            buzz={buzz}
+            questionScored={questionScored}
+            soundEnabled={hostSoundEnabled}
+            onSoundChange={setHostSoundEnabled}
+            onJudge={(type) => judge(type, qPoints)}
+            onCancel={cancelBuzz}
+            onNext={nextQuestion}
+          />
+          <button
+            className={styles.remoteShare}
+            onClick={() => copyJoinUrl(remoteUrl, setRemoteCopied)}
+          >
+            {remoteCopied ? 'リモコンURLをコピーしました' : 'このリモコンURLをコピー'}
+          </button>
+        </>
+      ) : (
       <div className={styles.main}>
         <div>
+          <HostSettings
+            hostSoundEnabled={hostSoundEnabled}
+            defaultPlayerSound={roomSettings.defaultPlayerSound}
+            yajiCooldownSeconds={roomSettings.yajiCooldownSeconds}
+            onHostSoundChange={setHostSoundEnabled}
+            onRoomSettingsChange={updateRoomSettings}
+          />
+          <button
+            className={styles.remoteLink}
+            onClick={() => copyJoinUrl(remoteUrl, setRemoteCopied)}
+          >
+            {remoteCopied ? '✅ リモコンURLをコピー済み' : '📱 2台目用リモコンURLをコピー'}
+          </button>
           <div style={{ marginBottom: 16 }}>
             <HostControls
               buzz={buzz}
+              questionNumber={qNum}
+              questionScored={questionScored}
+              activePoints={qPoints}
               qDisplayText={qText}
               onAsk={askQuestion}
-              onJudge={judge}
+              onJudge={(type) => judge(type, qPoints)}
               onCancel={cancelBuzz}
               onNext={nextQuestion}
             />
@@ -206,6 +330,7 @@ function HostDashboard({ code }: { code: string }) {
           <Scoreboard roomRef={roomRef} players={players} />
         </div>
       </div>
+      )}
 
       <ResultOverlay result={resultDisplay} showPtsBadge />
     </div>

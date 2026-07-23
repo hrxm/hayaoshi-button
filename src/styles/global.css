@@ -7,6 +7,11 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+html {
+  /* アプリは常時ダークテーマ。ネイティブのスクロールバー・フォームコントロールの配色をダークに合わせる */
+  color-scheme: dark;
+}
+
 html,
 body,
 #root {

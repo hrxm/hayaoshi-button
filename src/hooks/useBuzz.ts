@@ -23,7 +23,10 @@ export function useBuzz(roomRef: DatabaseReference | null) {
       unlockAudio(); // オーディオ解錠（最初のタップ）
       const result = await runTransaction(buzzRef, (cur) => {
         if (cur === null) {
-          return { id: pid, name, emoji, ts: serverTimestamp() };
+          const token =
+            globalThis.crypto?.randomUUID?.() ||
+            `${pid}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+          return { id: pid, name, emoji, token, ts: serverTimestamp() };
         }
         return; // 既に誰かが押している → 中止
       });

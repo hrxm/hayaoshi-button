@@ -7,8 +7,38 @@
 
 .panel h3 {
   font-size: 15px;
-  margin-bottom: 14px;
   color: var(--fg-70);
+}
+
+.questionHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.questionHeading h3 {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.questionHeading strong {
+  color: var(--gold);
+  font-size: 27px;
+  letter-spacing: 0.04em;
+}
+
+.foldButton {
+  width: auto;
+  border: 0;
+  background: transparent;
+  color: var(--fg-45);
+  font-size: 12px;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 8px;
 }
 
 .textarea {
@@ -76,6 +106,17 @@
   line-height: 1.5;
   min-height: 90px;
   margin: 18px 0;
+}
+
+@media (max-width: 560px) {
+  .questionHeading {
+    align-items: flex-start;
+  }
+
+  .questionHeading h3 {
+    flex-direction: column;
+    gap: 2px;
+  }
 }
 
 .qDisplayCursor {

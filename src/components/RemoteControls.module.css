@@ -1,0 +1,108 @@
+.remote {
+  width: min(680px, 100%);
+  margin: 0 auto;
+  display: grid;
+  gap: 14px;
+}
+
+.question,
+.answerer {
+  border: 1px solid var(--fg-10);
+  background: var(--fg-05);
+  border-radius: 20px;
+  padding: 18px;
+  text-align: center;
+}
+
+.questionNumber {
+  color: var(--gold);
+  font-size: clamp(24px, 7vw, 42px);
+  font-weight: 900;
+}
+
+.questionText {
+  color: var(--fg-70);
+  margin-top: 8px;
+  font-size: clamp(15px, 4vw, 21px);
+  max-height: 4.5em;
+  overflow: auto;
+}
+
+.answerer {
+  min-height: 116px;
+  display: grid;
+  place-content: center;
+  gap: 6px;
+}
+
+.answerer span {
+  color: var(--fg-45);
+  font-size: 13px;
+}
+
+.answerer strong {
+  color: var(--fg-45);
+  font-size: clamp(25px, 8vw, 44px);
+}
+
+.answerer.active {
+  background: rgba(255, 213, 74, 0.1);
+  border-color: rgba(255, 213, 74, 0.4);
+}
+
+.answerer.active strong {
+  color: var(--gold);
+}
+
+.judges {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.judges button,
+.cancel,
+.next {
+  min-height: 64px;
+  border: 0;
+  border-radius: 15px;
+  color: white;
+  font-size: clamp(16px, 4.8vw, 23px);
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.judges button:disabled,
+.cancel:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.correct {
+  background: linear-gradient(135deg, #66bb6a, #2e7d32);
+}
+
+.wrong {
+  background: linear-gradient(135deg, #ef5350, #b71c1c);
+}
+
+.cancel {
+  min-height: 48px;
+  background: var(--fg-06);
+  border: 1px solid var(--fg-18);
+  color: var(--fg-70);
+  font-size: 14px;
+}
+
+.next {
+  background: linear-gradient(135deg, #ffca28, #ff8f00);
+  color: #0d0d14;
+}
+
+.sound {
+  justify-self: center;
+  color: var(--fg-70);
+  padding: 10px;
+  display: flex;
+  gap: 8px;
+}

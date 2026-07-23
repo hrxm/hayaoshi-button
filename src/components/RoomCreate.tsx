@@ -39,7 +39,12 @@ export function RoomCreate({ onCreated }: RoomCreateProps) {
         password: usePw ? pw.trim() : '',
         questionNumber: 1,
         questionText: '',
+        questionPoints: 1,
         result: null,
+        settings: {
+          defaultPlayerSound: true,
+          yajiCooldownSeconds: 10,
+        },
         createdAt: serverTimestamp(),
       });
       onCreated(newCode);

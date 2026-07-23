@@ -23,7 +23,11 @@
 
 .nm {
   flex: 1;
+  min-width: 0; /* flexアイテムを実コンテンツ幅より縮められるようにし、長い名前を省略可能にする */
   font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .sc {

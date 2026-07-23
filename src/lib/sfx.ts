@@ -19,6 +19,16 @@ export const YAJI_SFX = [
 ];
 
 const audioCache: Partial<Record<SfxKey, HTMLAudioElement>> = {};
+let soundEnabled = true;
+
+export function setSoundEnabled(enabled: boolean) {
+  soundEnabled = enabled;
+}
+
+export function isSoundEnabled() {
+  return soundEnabled;
+}
+
 function getAudio(key: SfxKey): HTMLAudioElement {
   if (!audioCache[key]) {
     const a = new Audio(encodeURI(SFX[key]));
@@ -32,6 +42,7 @@ let audioCtx: AudioContext | null = null;
 
 // オーディオ解錠（最初のユーザー操作時に呼ぶ）。AudioContext を作成/再開する。
 export function unlockAudio(): AudioContext | null {
+  if (!soundEnabled) return null;
   if (!audioCtx) {
     try {
       audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -60,6 +71,7 @@ function beep(freq: number, durationMs: number, type: OscillatorType = 'sine', g
 }
 
 function playSfx(key: SfxKey, fallback?: () => void) {
+  if (!soundEnabled) return;
   try {
     const a = getAudio(key).cloneNode() as HTMLAudioElement; // 連打で重ねて鳴らせるよう複製
     a.play().catch(() => fallback?.());
@@ -90,6 +102,7 @@ export function playQuestion() {
 // ヤジを鳴らす（i省略でランダム）。戻り値は使ったインデックス（同期用）
 export function playYaji(i?: number): number {
   const idx = typeof i === 'number' ? i % YAJI_SFX.length : Math.floor(Math.random() * YAJI_SFX.length);
+  if (!soundEnabled) return idx;
   try {
     const a = new Audio(encodeURI(YAJI_SFX[idx]));
     a.play().catch(() => beep(440, 180, 'triangle', 0.18));

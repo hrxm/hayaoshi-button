@@ -5,17 +5,31 @@ import type { Buzz } from '../types';
 
 interface HostControlsProps {
   buzz: Buzz | null;
+  questionNumber: number;
+  questionScored: boolean;
+  activePoints: number;
   onAsk: (text: string, pts: number) => void;
-  onJudge: (type: 'correct' | 'wrong', pts: number) => void;
+  onJudge: (type: 'correct' | 'wrong') => void;
   onCancel: () => void;
   onNext: () => void;
   qDisplayText: string;
 }
 
 // host.html の問題入力・出題・判定パネルを移植。
-export function HostControls({ buzz, onAsk, onJudge, onCancel, onNext, qDisplayText }: HostControlsProps) {
+export function HostControls({
+  buzz,
+  questionNumber,
+  questionScored,
+  activePoints,
+  onAsk,
+  onJudge,
+  onCancel,
+  onNext,
+  qDisplayText,
+}: HostControlsProps) {
   const [qInput, setQInput] = useState('');
   const [pts, setPts] = useState(1);
+  const [questionFolded, setQuestionFolded] = useState(false);
   const { shown: qDisplayShown, streaming: qDisplayStreaming } = useStreamedText(qDisplayText);
 
   const currentPts = () => Math.max(1, pts || 1);
@@ -32,7 +46,18 @@ export function HostControls({ buzz, onAsk, onJudge, onCancel, onNext, qDisplayT
 
   return (
     <div className={styles.panel}>
-      <h3>問題</h3>
+      <div className={styles.questionHeading}>
+        <h3>
+          問題 <strong>第 {questionNumber} 問</strong>
+        </h3>
+        <button
+          className={styles.foldButton}
+          type="button"
+          onClick={() => setQuestionFolded((folded) => !folded)}
+        >
+          {questionFolded ? '問題文を表示' : '問題文を隠す'}
+        </button>
+      </div>
       <textarea
         className={styles.textarea}
         placeholder="問題文（任意）。空のままでもOK → 「第○問」だけ表示"
@@ -55,10 +80,12 @@ export function HostControls({ buzz, onAsk, onJudge, onCancel, onNext, qDisplayT
       <button className={styles.btnNext} onClick={ask}>
         📢 この問題を出す（流す）
       </button>
-      <div className={styles.qDisplay}>
-        {qDisplayShown}
-        {qDisplayStreaming && <span className={styles.qDisplayCursor}>|</span>}
-      </div>
+      {!questionFolded && (
+        <div className={styles.qDisplay} aria-label="出題中の問題文">
+          {qDisplayShown}
+          {qDisplayStreaming && <span className={styles.qDisplayCursor}>|</span>}
+        </div>
+      )}
 
       <div className={`${styles.buzzBox} ${buzz ? styles.active : ''}`}>
         <div className={styles.buzzLabel}>回答中</div>
@@ -67,18 +94,22 @@ export function HostControls({ buzz, onAsk, onJudge, onCancel, onNext, qDisplayT
         </div>
       </div>
       <div className={styles.judgeRow}>
-        <button className={styles.btnOk} disabled={!buzz} onClick={() => onJudge('correct', currentPts())}>
-          ⭕ 正解 {buzz ? `+${currentPts()}` : ''}
+        <button
+          className={styles.btnOk}
+          disabled={!buzz || questionScored}
+          onClick={() => onJudge('correct')}
+        >
+          {questionScored ? '採点済み' : `⭕ 正解 [C] ${buzz ? `+${activePoints}` : ''}`}
         </button>
-        <button className={styles.btnNg} disabled={!buzz} onClick={() => onJudge('wrong', currentPts())}>
-          ❌ 不正解
+        <button className={styles.btnNg} disabled={!buzz} onClick={() => onJudge('wrong')}>
+          ❌ 不正解 [X]
         </button>
         <button className={styles.btnCancel} disabled={!buzz} onClick={onCancel}>
           ↩ キャンセル
         </button>
       </div>
       <button className={styles.btnNext} onClick={next}>
-        ▶ 次の問題へ
+        ▶ 次の問題 [.]
       </button>
     </div>
   );

@@ -1,0 +1,56 @@
+.nameButton {
+  border: 0;
+  background: transparent;
+  color: var(--fg-70);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  cursor: pointer;
+  font-size: 19px;
+  /* モバイルの推奨最小タップ領域(44px)を満たす */
+  min-height: 44px;
+  padding: 4px 8px;
+}
+
+.nameButton span {
+  font-size: 25px;
+}
+
+.nameButton small {
+  color: var(--fg-30);
+  font-size: 10px;
+  border-bottom: 1px solid var(--fg-30);
+}
+
+.editor {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+.editor input {
+  width: min(180px, 55vw);
+  padding: 8px 10px;
+  border: 1px solid var(--red-30);
+  border-radius: 8px;
+  background: var(--fg-06);
+  color: var(--fg);
+  font-size: 16px;
+}
+
+.editor button {
+  border: 0;
+  border-radius: 8px;
+  padding: 7px 10px;
+  /* モバイルの推奨最小タップ領域(44px)を満たす */
+  min-height: 44px;
+  background: var(--red);
+  color: white;
+  font-weight: 700;
+}
+
+.editor .cancel {
+  background: var(--fg-06);
+  color: var(--fg-70);
+}
