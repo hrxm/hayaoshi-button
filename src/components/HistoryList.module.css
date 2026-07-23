@@ -1,0 +1,36 @@
+.list {
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 4px;
+  font-size: 14px;
+  border-bottom: 1px solid var(--fg-06);
+}
+
+.hq {
+  color: var(--fg-45);
+  font-weight: 700;
+  width: 34px;
+}
+
+.hname {
+  flex: 1;
+  font-weight: 700;
+}
+
+.hpts {
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.empty {
+  color: var(--fg-25);
+  text-align: center;
+  padding: 20px;
+  font-size: 14px;
+}

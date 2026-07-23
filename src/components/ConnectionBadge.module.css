@@ -1,0 +1,13 @@
+.badge {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 999;
+  background: var(--red-deep);
+  color: var(--fg);
+  font-size: 12px;
+  text-align: center;
+  padding: 6px 8px;
+  letter-spacing: 0.02em;
+}

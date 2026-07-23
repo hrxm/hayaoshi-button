@@ -1,0 +1,158 @@
+.panel {
+  background: var(--fg-05);
+  border: 1px solid var(--fg-10);
+  border-radius: 18px;
+  padding: 20px;
+}
+
+.panel h3 {
+  font-size: 15px;
+  margin-bottom: 14px;
+  color: var(--fg-70);
+}
+
+.textarea {
+  width: 100%;
+  min-height: 70px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1.5px solid var(--red-25);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 15px;
+  color: var(--fg);
+  outline: none;
+  resize: vertical;
+}
+
+.textarea:focus {
+  border-color: var(--red);
+}
+
+.charCount {
+  text-align: right;
+  font-size: 11px;
+  color: var(--fg-30);
+  margin-top: 2px;
+}
+
+.ptsRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0;
+  font-size: 14px;
+  color: var(--fg-70);
+}
+
+.ptsRow input {
+  width: 70px;
+  margin: 0;
+  padding: 8px 10px;
+  font-size: 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1.5px solid var(--red-25);
+  border-radius: 10px;
+  color: var(--fg);
+  text-align: center;
+}
+
+.btnNext {
+  width: 100%;
+  border: none;
+  border-radius: 12px;
+  padding: 15px;
+  font-size: 16px;
+  font-weight: 900;
+  cursor: pointer;
+  background: linear-gradient(135deg, #ffca28, #ff8f00);
+  color: #0d0d14;
+  margin-top: 12px;
+}
+
+.qDisplay {
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1.5;
+  min-height: 90px;
+  margin: 18px 0;
+}
+
+.qDisplayCursor {
+  color: #ff5252;
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+.buzzBox {
+  text-align: center;
+  padding: 24px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  margin: 16px 0;
+  transition: all 0.3s;
+}
+
+.buzzBox.active {
+  background: rgba(255, 213, 74, 0.12);
+  border: 1px solid rgba(255, 213, 74, 0.4);
+  transform: scale(1.01);
+}
+
+.buzzLabel {
+  font-size: 14px;
+  color: var(--fg-45);
+}
+
+.buzzWho {
+  font-size: 34px;
+  font-weight: 900;
+  color: var(--gold);
+  margin-top: 6px;
+  min-height: 42px;
+}
+
+.judgeRow {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.judgeRow button {
+  flex: 1;
+  padding: 13px 6px;
+  font-size: 15px;
+  border: none;
+  border-radius: 12px;
+  color: var(--fg);
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.judgeRow button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.btnOk {
+  background: linear-gradient(135deg, #66bb6a, #2e7d32);
+  box-shadow: 0 4px 20px rgba(76, 175, 80, 0.3);
+}
+
+.btnNg {
+  background: linear-gradient(135deg, #ef5350, #c62828);
+  box-shadow: 0 4px 20px rgba(229, 57, 53, 0.3);
+}
+
+.btnCancel {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--fg-18) !important;
+  color: var(--fg-70) !important;
+  box-shadow: none;
+  font-size: 13px;
+  font-weight: 700 !important;
+}

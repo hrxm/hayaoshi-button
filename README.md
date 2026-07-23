@@ -6,9 +6,9 @@
 
 **日本語** | [English](#english)
 
-みんなのスマホをリアルタイム早押しボタンに。サーバー不要、Firebase だけで動きます。
+みんなのスマホをリアルタイム早押しボタンに。Vite + React + Firebase、Vercel にそのままデプロイできます。
 
-> 出題者が `host.html` を開いてルームを作成 → 回答者が `index.html` でコードを入力して参加 → 赤いボタンを押す！
+> 出題者が `/host` を開いてルームを作成 → 回答者が `/` でコードを入力して参加 → 赤いボタンを押す！
 
 ## 特徴
 
@@ -17,18 +17,29 @@
 - **得点・履歴管理** — 問題ごとにポイントを設定、正解履歴をリアルタイム記録
 - **ヤジ機能** — 誰でもランダムな効果音を全員の画面に飛ばせる
 - **セッション復帰** — 出題者がページを離れてもルームコードで再接続可能
+- **接続状態の表示** — Firebase との接続が切れると画面上部に警告バッジが出る
 - **最大100人同時接続** — Firebase Realtime Database の無料プランで対応
+
+## 技術構成
+
+- **フロントエンド**: Vite + React + TypeScript（SPA、`react-router-dom` でルーティング）
+- **バックエンド**: Firebase Realtime Database（サーバーコードなし、クライアント直結）
+- **デプロイ**: Vercel（GitHub 連携で `main` に push すると自動デプロイ）
 
 ## ファイル構成
 
-| ファイル | 役割 |
+| パス | 役割 |
 |---|---|
-| `index.html` | 回答者の参加画面 |
-| `play.html` | 回答者の早押しボタン画面 |
-| `host.html` | 出題者・中央スクリーン（操作 + スコアボード） |
-| `common.js` | 効果音・絵文字・演出など共通処理 |
-| `firebase-config.example.js` | Firebase 設定テンプレート |
-| `sfx/` | クイズ効果音（CC BY 4.0） |
+| `src/pages/Join.tsx` | 回答者の参加画面（旧 `index.html`） |
+| `src/pages/Play.tsx` | 回答者の早押しボタン画面（旧 `play.html`） |
+| `src/pages/Host.tsx` | 出題者・中央スクリーン（旧 `host.html`） |
+| `src/components/` | ボタン・問題ストリーミング・スコアボードなどの共通コンポーネント |
+| `src/hooks/` | Firebase 購読・早押しトランザクションなどのロジック |
+| `src/lib/firebase.ts` | Firebase 初期化（設定は環境変数から読む） |
+| `src/lib/sfx.ts` | 効果音再生（WebAudio フォールバック付き） |
+| `.env.example` | Firebase 設定の環境変数テンプレート |
+| `public/sfx/` | クイズ効果音（CC BY 4.0） |
+| `vercel.json` | SPA ルーティング用の rewrite 設定 |
 
 ## セットアップ
 
@@ -38,35 +49,47 @@
 2. **Realtime Database** を追加（テストモードで開始、ロケーションはデフォルトでOK）
 3. プロジェクト設定 → マイアプリ → ウェブアプリを追加 → `firebaseConfig` をコピー
 
-### 2. 設定ファイルを作成する
+### 2. 環境変数を設定する
 
 ```bash
-cp firebase-config.example.js firebase-config.js
+cp .env.example .env.local
 ```
 
-`firebase-config.js` を開き、`firebaseConfig` の中身をコピーした値に書き換える。
+`.env.local` を開き、`VITE_FIREBASE_*` の値をコピーした `firebaseConfig` の内容に書き換える。
 
 > [!IMPORTANT]
-> `firebase-config.js` は `.gitignore` 済みです。**絶対に GitHub にコミットしないでください。**
+> `.env.local` は `.gitignore` 済みです。**絶対に GitHub にコミットしないでください。**
+> （`.env.example` はプレースホルダのみなので追跡されます。）
 
 ### 3. ローカルで起動する
 
 ```bash
-python3 -m http.server 8000
+npm install
+npm run dev
 ```
 
-| 役割 | URL |
+表示された URL（例: `http://localhost:5173`）にアクセス。
+
+| 役割 | パス |
 |---|---|
-| 出題者 | `http://localhost:8000/host.html` |
-| 回答者（同じ端末） | `http://localhost:8000/index.html` |
-| 回答者（スマホなど） | `http://<あなたのIPアドレス>:8000/index.html` |
+| 回答者の参加画面 | `/` |
+| 出題者・中央スクリーン | `/host` |
 
-同じ Wi-Fi 内のスマホから接続する場合は `ipconfig getifaddr en0`（Mac）でIPアドレスを確認してください。
+同じ Wi-Fi 内のスマホから接続する場合は `npm run dev -- --host` で `Network:` の URL を有効化してください。
 
-> [!WARNING]
-> GitHub Pages にデプロイしても `firebase-config.js` はアップロードされないため、Pages URL から Firebase への接続はできません。パーティなどの一時利用はローカルサーバー運用が最もシンプルです。
+### 4. Vercel にデプロイする
 
-### 4. Firebase セキュリティルール
+1. このリポジトリを GitHub に push
+2. [Vercel](https://vercel.com/) でこのリポジトリを Import（フレームワークは自動検出: Vite）
+3. Project Settings → **Environment Variables** に `.env.example` と同じキー（`VITE_FIREBASE_*`）を設定
+4. Deploy。以降 `main` に push するたびに自動デプロイされる
+
+> [!NOTE]
+> `VITE_` から始まる環境変数はビルド時にクライアントバンドルへ埋め込まれます（今までの
+> `firebase-config.js` と同じ扱い）。Firebase の Web 設定値自体は秘密情報ではなく、実際のアクセス制御は
+> 次の Realtime Database ルールで行います。
+
+### 5. Firebase セキュリティルール
 
 テストモードは約30日で期限切れになります。**Realtime Database → ルール** タブに以下を貼り付けてください。
 
@@ -81,8 +104,8 @@ python3 -m http.server 8000
 
 ## 遊び方
 
-1. 出題者が `host.html` を開いて **「ルーム作成！」** → 4桁のコードが表示される
-2. 回答者が `index.html` を開いて **コード** と **名前** を入力して参加
+1. 出題者が `/host` を開いて **「ルーム作成！」** → 4桁のコードが表示される
+2. 回答者が `/` を開いて **コード** と **名前** を入力して参加
 3. 出題者が問題文を入力して **「📢 この問題を出す（流す）」** → 文字が全員の画面に流れる
 4. 回答者が赤いボタンを押す → **最初の1人だけ** ロックされ「○○さんが回答中」
 5. 出題者が **⭕ 正解** / **❌ 不正解** / **↩ キャンセル** を選択
@@ -90,7 +113,7 @@ python3 -m http.server 8000
 
 ## 音源クレジット
 
-`sfx/` フォルダの効果音は **CC BY 4.0** ライセンスで利用しています。再配布・公開の際はライセンス表示が必要です。
+`public/sfx/` フォルダの効果音は **CC BY 4.0** ライセンスで利用しています。再配布・公開の際はライセンス表示が必要です。
 
 ---
 
@@ -100,9 +123,9 @@ python3 -m http.server 8000
 
 [日本語](#top) | **English**
 
-Turn everyone's smartphone into a real-time quiz buzzer. No server required — runs entirely on Firebase.
+Turn everyone's smartphone into a real-time quiz buzzer. Vite + React + Firebase, ready to deploy on Vercel.
 
-> Host opens `host.html` and creates a room → Players open `index.html`, enter the room code and their name → Hit the big red button!
+> Host opens `/host` and creates a room → Players open `/`, enter the room code and their name → Hit the big red button!
 
 ## Features
 
@@ -111,18 +134,29 @@ Turn everyone's smartphone into a real-time quiz buzzer. No server required — 
 - **Scoring & history** — Set points per question; correct answers are logged automatically
 - **Heckle (ヤジ)** — Anyone can fire a random sound effect to all screens at any time
 - **Session recovery** — Host can reconnect to an active room using the room code
+- **Connection status** — A banner appears if the Firebase connection drops
 - **Up to 100 concurrent players** — Supported on Firebase Realtime Database free plan
+
+## Stack
+
+- **Frontend**: Vite + React + TypeScript (SPA, routed with `react-router-dom`)
+- **Backend**: Firebase Realtime Database (no server code, client talks to it directly)
+- **Deploy**: Vercel (connected to GitHub — every push to `main` auto-deploys)
 
 ## File structure
 
-| File | Purpose |
+| Path | Purpose |
 |---|---|
-| `index.html` | Player join screen |
-| `play.html` | Player buzzer screen |
-| `host.html` | Host / central display (controls + scoreboard) |
-| `common.js` | Shared: sound effects, emoji assignment, utilities |
-| `firebase-config.example.js` | Firebase config template |
-| `sfx/` | Quiz sound effects (CC BY 4.0) |
+| `src/pages/Join.tsx` | Player join screen (formerly `index.html`) |
+| `src/pages/Play.tsx` | Player buzzer screen (formerly `play.html`) |
+| `src/pages/Host.tsx` | Host / central display (formerly `host.html`) |
+| `src/components/` | Shared UI: buzz button, question stream, scoreboard, etc. |
+| `src/hooks/` | Firebase subscription and buzz-transaction logic |
+| `src/lib/firebase.ts` | Firebase init (config read from environment variables) |
+| `src/lib/sfx.ts` | Sound playback with WebAudio fallback |
+| `.env.example` | Firebase config environment variable template |
+| `public/sfx/` | Quiz sound effects (CC BY 4.0) |
+| `vercel.json` | SPA rewrite config for client-side routing |
 
 ## Setup
 
@@ -132,35 +166,47 @@ Turn everyone's smartphone into a real-time quiz buzzer. No server required — 
 2. Add a **Realtime Database** (start in test mode, default location is fine)
 3. Go to Project Settings → Your apps → Add web app → copy the `firebaseConfig` object
 
-### 2. Create your config file
+### 2. Configure environment variables
 
 ```bash
-cp firebase-config.example.js firebase-config.js
+cp .env.example .env.local
 ```
 
-Open `firebase-config.js` and replace the placeholder values with your copied Firebase config.
+Open `.env.local` and fill in the `VITE_FIREBASE_*` values from your copied Firebase config.
 
 > [!IMPORTANT]
-> `firebase-config.js` is listed in `.gitignore`. **Never commit it to GitHub.**
+> `.env.local` is listed in `.gitignore`. **Never commit it to GitHub.**
+> (`.env.example` holds only placeholders, so it is tracked.)
 
 ### 3. Run locally
 
 ```bash
-python3 -m http.server 8000
+npm install
+npm run dev
 ```
 
-| Role | URL |
+Open the URL Vite prints (e.g. `http://localhost:5173`).
+
+| Role | Path |
 |---|---|
-| Host | `http://localhost:8000/host.html` |
-| Players (same machine) | `http://localhost:8000/index.html` |
-| Players (phones on same Wi-Fi) | `http://<your-ip-address>:8000/index.html` |
+| Player join screen | `/` |
+| Host / central display | `/host` |
 
-Find your IP address with `ipconfig getifaddr en0` (Mac) or `ipconfig` (Windows).
+To connect from phones on the same Wi-Fi, run `npm run dev -- --host` to expose the `Network:` URL.
 
-> [!WARNING]
-> `firebase-config.js` is not pushed to GitHub, so a GitHub Pages deployment cannot connect to Firebase. For a party or one-off event, a local server is the simplest option.
+### 4. Deploy to Vercel
 
-### 4. Firebase Security Rules
+1. Push this repository to GitHub
+2. Import the repository in [Vercel](https://vercel.com/) (framework auto-detected: Vite)
+3. In Project Settings → **Environment Variables**, add the same keys as `.env.example` (`VITE_FIREBASE_*`)
+4. Deploy. Every push to `main` auto-deploys from then on.
+
+> [!NOTE]
+> Variables prefixed `VITE_` are embedded into the client bundle at build time — the same
+> exposure as the old `firebase-config.js`. Firebase web config values aren't secrets; actual
+> access control comes from the Realtime Database rules below.
+
+### 5. Firebase Security Rules
 
 Test mode expires after ~30 days. Paste the following into the **Rules** tab of your Realtime Database:
 
@@ -175,8 +221,8 @@ Test mode expires after ~30 days. Paste the following into the **Rules** tab of 
 
 ## How to play
 
-1. Host opens `host.html` → clicks **「ルーム作成！」** → a 4-character room code appears
-2. Players open `index.html` → enter the **code** and their **name** → tap join
+1. Host opens `/host` → clicks **「ルーム作成！」** → a 4-character room code appears
+2. Players open `/` → enter the **code** and their **name** → tap join
 3. Host types a question and clicks **「📢 この問題を出す」** → text streams to all screens
 4. Players tap the red button → **only the first press** locks in; others see "○○ is answering"
 5. Host selects **⭕ Correct** / **❌ Wrong** / **↩ Cancel**
@@ -184,7 +230,7 @@ Test mode expires after ~30 days. Paste the following into the **Rules** tab of 
 
 ## Sound credits
 
-Sound effects in `sfx/` are used under the **Creative Commons Attribution 4.0 International (CC BY 4.0)** license. Attribution is required for redistribution.
+Sound effects in `public/sfx/` are used under the **Creative Commons Attribution 4.0 International (CC BY 4.0)** license. Attribution is required for redistribution.
 
 ---
 

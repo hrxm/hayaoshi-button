@@ -1,0 +1,51 @@
+.buzzBtn {
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  background: radial-gradient(circle at 35% 32%, var(--red-light), var(--red-strong), var(--red-deep));
+  color: var(--fg);
+  font-size: 52px;
+  font-weight: 900;
+  letter-spacing: -1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 0 var(--red-shadow), 0 16px 44px rgba(255, 23, 68, 0.45);
+  transition: transform 0.08s, box-shadow 0.08s;
+}
+
+.buzzBtn:active {
+  transform: translateY(7px) scale(0.96);
+  box-shadow: 0 3px 0 var(--red-shadow), 0 6px 20px rgba(255, 23, 68, 0.3);
+}
+
+.buzzBtn.locked {
+  background: radial-gradient(circle at 35% 32%, var(--grey-locked), var(--grey-locked-dark));
+  box-shadow: 0 6px 0 #1a1a1a;
+  cursor: default;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.buzzBtn.mine {
+  background: radial-gradient(circle at 35% 32%, #ffe066, var(--gold-strong));
+  color: #0d0d14;
+  box-shadow: 0 6px 0 var(--gold-shadow), 0 12px 36px rgba(255, 170, 0, 0.5);
+}
+
+@media (max-height: 700px) {
+  .buzzBtn {
+    width: 210px;
+    height: 210px;
+    font-size: 44px;
+  }
+}
+
+@media (max-height: 610px) {
+  .buzzBtn {
+    width: 184px;
+    height: 184px;
+    font-size: 38px;
+  }
+}

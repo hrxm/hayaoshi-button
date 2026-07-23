@@ -1,0 +1,128 @@
+.page {
+  min-height: 100vh;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.logo {
+  font-size: 46px;
+  font-weight: 900;
+  color: var(--red);
+  text-shadow: 0 0 30px rgba(255, 59, 59, 0.5);
+  letter-spacing: -2px;
+  margin-bottom: 4px;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: var(--fg-45);
+  margin-bottom: 36px;
+  letter-spacing: 0.1em;
+}
+
+.card {
+  background: var(--fg-05);
+  border: 1px solid var(--red-25);
+  border-radius: 22px;
+  padding: 32px 28px;
+  width: 340px;
+  max-width: 100%;
+  text-align: center;
+}
+
+.card h2 {
+  font-size: 18px;
+  margin-bottom: 20px;
+  color: var(--fg-70);
+}
+
+.input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1.5px solid var(--red-30);
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-size: 17px;
+  color: var(--fg);
+  outline: none;
+  text-align: center;
+  margin-bottom: 14px;
+  transition: border-color 0.2s;
+}
+
+.input:focus {
+  border-color: var(--red);
+}
+
+.input::placeholder {
+  color: var(--fg-25);
+}
+
+.code {
+  text-transform: uppercase;
+  letter-spacing: 6px;
+  font-weight: 900;
+  font-size: 22px;
+}
+
+.submit {
+  width: 100%;
+  background: linear-gradient(135deg, #ff5252, var(--red-strong));
+  color: var(--fg);
+  border: none;
+  border-radius: 12px;
+  padding: 16px;
+  font-size: 18px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(255, 23, 68, 0.35);
+  transition: transform 0.1s, box-shadow 0.2s;
+}
+
+.submit:active {
+  transform: scale(0.97);
+}
+
+.submit:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.err {
+  color: #ff6b6b;
+  font-size: 13px;
+  min-height: 18px;
+  margin-bottom: 8px;
+}
+
+.hostLink {
+  margin-top: 24px;
+  font-size: 13px;
+}
+
+.hostLink a {
+  color: rgba(255, 59, 59, 0.6);
+  text-decoration: none;
+}
+
+.hostLink a:hover {
+  color: var(--red);
+}
+
+.credit {
+  position: fixed;
+  bottom: 14px;
+  font-size: 10px;
+  color: var(--fg-18);
+  text-align: center;
+  line-height: 1.6;
+}
+
+.credit a {
+  color: rgba(255, 59, 59, 0.3);
+  text-decoration: none;
+}

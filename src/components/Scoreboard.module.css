@@ -1,0 +1,59 @@
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border-radius: 12px;
+}
+
+.row.lead {
+  background: rgba(255, 213, 74, 0.12);
+}
+
+.rank {
+  width: 26px;
+  font-weight: 900;
+  color: var(--fg-45);
+  text-align: center;
+}
+
+.em {
+  font-size: 22px;
+}
+
+.nm {
+  flex: 1;
+  font-weight: 700;
+}
+
+.sc {
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--gold);
+  min-width: 34px;
+  text-align: right;
+}
+
+.adj {
+  display: flex;
+  gap: 4px;
+}
+
+.adj button {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  font-size: 16px;
+  border-radius: 8px;
+  border: 1px solid var(--fg-10);
+  background: var(--fg-06);
+  color: var(--fg);
+  cursor: pointer;
+}
+
+.empty {
+  color: var(--fg-25);
+  text-align: center;
+  padding: 20px;
+  font-size: 14px;
+}

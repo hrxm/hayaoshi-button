@@ -1,0 +1,32 @@
+/* 早押しボタン — 共通デザイントークン */
+:root {
+  --bg: #0d0d14;
+  --fg: #fff;
+  --red-light: #ff7878;
+  --red: #ff3b3b;
+  --red-strong: #ff1744;
+  --red-deep: #b3001b;
+  --red-shadow: #7a0012;
+  --gold: #ffd54a;
+  --gold-strong: #ffaa00;
+  --gold-shadow: #b35900;
+  --green: #4caf50;
+  --grey-locked: #555;
+  --grey-locked-dark: #333;
+
+  --fg-90: rgba(255, 255, 255, 0.9);
+  --fg-70: rgba(255, 255, 255, 0.7);
+  --fg-45: rgba(255, 255, 255, 0.45);
+  --fg-30: rgba(255, 255, 255, 0.3);
+  --fg-25: rgba(255, 255, 255, 0.25);
+  --fg-18: rgba(255, 255, 255, 0.18);
+  --fg-10: rgba(255, 255, 255, 0.1);
+  --fg-06: rgba(255, 255, 255, 0.06);
+  --fg-05: rgba(255, 255, 255, 0.05);
+
+  --red-25: rgba(255, 59, 59, 0.25);
+  --red-30: rgba(255, 59, 59, 0.3);
+
+  --font-sans: 'Hiragino Sans', 'Yu Gothic', sans-serif;
+  --font-mono: 'Courier New', monospace;
+}

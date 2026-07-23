@@ -1,0 +1,44 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  z-index: 50;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+  background: rgba(13, 13, 20, 0.9);
+}
+
+.overlay.show {
+  opacity: 1;
+}
+
+.big {
+  font-size: 90px;
+  font-weight: 900;
+}
+
+.who {
+  font-size: 22px;
+  color: var(--fg);
+}
+
+.ptsBadge {
+  font-size: 18px;
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.overlay.correct .big {
+  color: var(--green);
+  text-shadow: 0 0 40px rgba(76, 175, 80, 0.6);
+}
+
+.overlay.wrong .big {
+  color: #ff5252;
+  text-shadow: 0 0 40px rgba(255, 82, 82, 0.6);
+}
