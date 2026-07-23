@@ -187,10 +187,24 @@
 .joinUrl {
   font-size: 13px;
   color: var(--fg-45);
+  background: none;
+  border: none;
+  padding: 8px 4px;
+  cursor: pointer;
+  text-align: left;
+  word-break: break-all;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+
+.joinUrl:hover,
+.joinUrl:active {
+  background: var(--fg-06);
 }
 
 .joinUrl b {
   color: var(--gold);
+  font-weight: 700;
 }
 
 .qbadge {

@@ -36,15 +36,16 @@
 
 .adj {
   display: flex;
-  gap: 4px;
+  gap: 6px;
 }
 
 .adj button {
-  width: 28px;
-  height: 28px;
+  /* Apple HIGの推奨最小タップ領域(44x44)に合わせる。狭い画面でも誤タップを防ぐ */
+  width: 44px;
+  height: 44px;
   padding: 0;
-  font-size: 16px;
-  border-radius: 8px;
+  font-size: 18px;
+  border-radius: 10px;
   border: 1px solid var(--fg-10);
   background: var(--fg-06);
   color: var(--fg);

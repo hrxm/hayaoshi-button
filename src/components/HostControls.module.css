@@ -18,7 +18,8 @@
   border: 1.5px solid var(--red-25);
   border-radius: 12px;
   padding: 12px 14px;
-  font-size: 15px;
+  /* 16px未満だとiOS Safariがフォーカス時に自動ズームしてしまうため16px以上を維持 */
+  font-size: 16px;
   color: var(--fg);
   outline: none;
   resize: vertical;

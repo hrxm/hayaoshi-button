@@ -95,6 +95,7 @@ function HostDashboard({ code }: { code: string }) {
   // 正規表現でURLを組み立てていたため、host.html という拡張子付きパスが無い環境（Vercelの
   // クリーンなルーティングなど）で壊れていた。ルーターのオリジンから直接組み立てる。
   const joinUrl = `${window.location.origin}/?room=${code}`;
+  const [urlCopied, setUrlCopied] = useState(false);
 
   function askQuestion(text: string) {
     if (!qTextRef || !buzzRef) return;
@@ -160,9 +161,13 @@ function HostDashboard({ code }: { code: string }) {
       <header className={styles.header}>
         <div className={styles.roomInfo}>
           <div className={styles.roomCode}>{code}</div>
-          <div className={styles.joinUrl}>
-            参加URL: <b>{joinUrl}</b>
-          </div>
+          <button
+            className={styles.joinUrl}
+            onClick={() => copyJoinUrl(joinUrl, setUrlCopied)}
+            title="タップしてコピー"
+          >
+            参加URL: <b>{joinUrl}</b> {urlCopied ? '✅ コピー済み' : '📋'}
+          </button>
         </div>
         <div className={styles.qbadge}>第 {qNum} 問</div>
         <div className={styles.toolbar}>
@@ -204,5 +209,20 @@ function HostDashboard({ code }: { code: string }) {
 
       <ResultOverlay result={resultDisplay} showPtsBadge />
     </div>
+  );
+}
+
+// UX改善: 参加URLをタップ/クリックでコピーできるようにする（モバイルで長いURLを選択するのは大変なため）。
+// navigator.clipboard は HTTPS または localhost でのみ使用可能（Vercel・ローカル開発どちらも対応）。
+function copyJoinUrl(url: string, setCopied: (v: boolean) => void) {
+  navigator.clipboard?.writeText(url).then(
+    () => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    },
+    () => {
+      // クリップボードAPIが使えない環境（古いブラウザ等）向けフォールバックは省略。
+      // 失敗してもURLは画面に表示されているので手動選択で対応可能。
+    }
   );
 }
