@@ -14,12 +14,17 @@ type SfxKey = keyof typeof SFX;
 // ヤジ（誰でもランダムに飛ばせる野次。回答中／出題中に使う）。
 // 拍手（クラップ・チア）もこの配列にランダムバリエーションとして追加している
 // （専用ボタンではなく、既存のヤジボタン・クールダウンを共有する仕様）。
+// 新しく追加した拍手2種は、元がステレオ114〜132kbpsと重かったため、
+// afconvert でモノラルAAC(.m4a) 64kbpsに圧縮して容量を約半分にしている
+// （このマシンでは afconvert がMP3エンコードに非対応だったためAACを採用）。
 // TODO(user): ブーイング音源が用意でき次第、この配列に追加する。
 export const YAJI_SFX = [
   '/sfx/yaji-Slide_Whistle01-5(Overtone-Up).mp3',
   '/sfx/yaji-Slide_Whistle01-6(Overtone-Down).mp3',
   '/sfx/yajiTambourine04-01(Hit-Hand).mp3',
   '/sfx/Yeah - Cheer-Yay02-2(High-Short-Solo).mp3',
+  '/sfx/Cheer-Yay01-4(High-Applause).m4a',
+  '/sfx/Applause04-3(Short).m4a',
 ];
 
 const audioCache: Partial<Record<SfxKey, HTMLAudioElement>> = {};
