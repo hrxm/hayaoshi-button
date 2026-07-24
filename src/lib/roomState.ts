@@ -134,3 +134,16 @@ export function applyFullReset(room: TransactionRoom): TransactionRoom {
   next.awards = {};
   return next;
 }
+
+// ホストがプレイヤーを退出させる。対象が現在の回答者だった場合はbuzzも解除し、
+// 誰も回答できない状態のまま固まらないようにする。
+export function applyKickPlayer(
+  room: TransactionRoom | null,
+  playerId: string
+): TransactionRoom | null {
+  if (!room?.players?.[playerId]) return null;
+  const next = copyRoom(room);
+  delete next.players![playerId];
+  if (next.buzz?.id === playerId) next.buzz = null;
+  return next;
+}

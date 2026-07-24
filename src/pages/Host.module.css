@@ -242,9 +242,7 @@
   gap: 8px;
 }
 
-.remoteLink,
 .remoteShare {
-  width: 100%;
   border: 1px dashed rgba(255, 213, 74, 0.35);
   border-radius: 12px;
   padding: 11px 14px;
@@ -269,9 +267,16 @@
 
 .main {
   display: grid;
-  grid-template-columns: 1fr 360px;
+  grid-template-columns: minmax(0, 1fr) 360px;
   gap: 20px;
   align-items: start;
+}
+
+/* Grid直下の列がコンテンツの本来の幅（min-content）より縮まないと、
+   スコア行などの横並び要素が画面幅を超えてはみ出してしまう。
+   min-width: 0 でグリッドアイテムを実際に縮められるようにする。 */
+.main > * {
+  min-width: 0;
 }
 
 @media (max-width: 820px) {

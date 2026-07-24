@@ -8,6 +8,8 @@ interface HostSettingsProps {
   yajiCooldownSeconds: number;
   onHostSoundChange: (enabled: boolean) => void;
   onRoomSettingsChange: (settings: Partial<RoomSettings>) => void;
+  remoteCopied: boolean;
+  onCopyRemoteUrl: () => void;
 }
 
 export function HostSettings({
@@ -16,6 +18,8 @@ export function HostSettings({
   yajiCooldownSeconds,
   onHostSoundChange,
   onRoomSettingsChange,
+  remoteCopied,
+  onCopyRemoteUrl,
 }: HostSettingsProps) {
   const [open, setOpen] = useState(false);
 
@@ -68,6 +72,9 @@ export function HostSettings({
             />
             秒
           </label>
+          <button type="button" className={styles.remoteLink} onClick={onCopyRemoteUrl}>
+            {remoteCopied ? '✅ リモコンURLをコピー済み' : '📱 2台目用リモコンURLをコピー'}
+          </button>
         </div>
       )}
     </section>

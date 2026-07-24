@@ -4,6 +4,7 @@ import {
   applyCorrectJudgment,
   applyFullReset,
   applyHistoryClear,
+  applyKickPlayer,
   applyNextQuestion,
   applyWrongJudgment,
   type TransactionRoom,
@@ -107,5 +108,23 @@ describe('atomic room state transitions', () => {
     expect(reset.history).toEqual({});
     expect(reset.players?.p1.score).toBe(0);
     expect(reset.meta.questionNumber).toBe(1);
+  });
+
+  test('kicking the current answerer removes them and clears the buzz', () => {
+    const next = applyKickPlayer(room(), 'p1');
+    expect(next?.players?.p1).toBeUndefined();
+    expect(next?.players?.p2).toBeDefined();
+    expect(next?.buzz).toBeNull();
+  });
+
+  test('kicking a non-answering player leaves the buzz untouched', () => {
+    const next = applyKickPlayer(room(), 'p2');
+    expect(next?.players?.p2).toBeUndefined();
+    expect(next?.players?.p1).toBeDefined();
+    expect(next?.buzz).toEqual(room().buzz);
+  });
+
+  test('kicking a nonexistent player id is a no-op', () => {
+    expect(applyKickPlayer(room(), 'ghost')).toBeNull();
   });
 });

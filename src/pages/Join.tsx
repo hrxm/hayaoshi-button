@@ -4,7 +4,8 @@ import { get, push, ref, set } from 'firebase/database';
 import { db } from '../lib/firebase';
 import { sanitizeCode } from '../lib/room';
 import { emojiFromKey } from '../lib/emoji';
-import type { RoomMeta } from '../types';
+import { findPlayerIdByName } from '../lib/playerState';
+import type { PlayersMap, RoomMeta } from '../types';
 import styles from './Join.module.css';
 
 // 旧 index.html の移植。回答者の参加画面。
@@ -39,8 +40,17 @@ export function Join() {
         return setErr('パスワードが違います');
       }
 
-      // プレイヤー登録
+      // 既に同じ名前のプレイヤーがいれば、新規作成せず既存の得点に再接続する
+      // （認証がないため「同じ名前 = 本人が戻ってきた」とみなすパーティ向けの割り切り）。
       const playersRef = ref(db, 'rooms/' + cleanCode + '/players');
+      const playersSnap = await get(playersRef);
+      const existingId = findPlayerIdByName((playersSnap.val() as PlayersMap) || {}, cleanName);
+      if (existingId) {
+        navigate(`/play?room=${cleanCode}&pid=${existingId}`);
+        return;
+      }
+
+      // プレイヤー登録
       const newRef = push(playersRef);
       const emoji = emojiFromKey(newRef.key!);
       await set(newRef, { name: cleanName, emoji, score: 0 });

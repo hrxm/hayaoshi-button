@@ -1,3 +1,4 @@
+import type { PlayersMap } from '../types';
 import type { TransactionRoom } from './roomState';
 
 export function claimYajiTimestamp(
@@ -30,4 +31,11 @@ export function applyPlayerRename(
   };
   if (next.buzz?.id === playerId) next.buzz.name = name;
   return next;
+}
+
+// 同じ名前のプレイヤーが既にルームにいるか探す（再接続用）。認証がないため
+// 「同じ名前 = 本人」とみなし、新規プレイヤーを作らず既存レコードに繋ぎ直す。
+export function findPlayerIdByName(players: PlayersMap, name: string): string | null {
+  const entry = Object.entries(players).find(([, p]) => p.name === name);
+  return entry ? entry[0] : null;
 }

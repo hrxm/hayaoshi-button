@@ -5,13 +5,14 @@
   text-align: center;
   max-width: 340px;
   width: 90vw;
-  height: 110px;
+  /* 画面の高さに応じて連続的に縮小する（固定ブレークポイントではなく clamp を使用） */
+  height: clamp(48px, 14dvh, 110px);
   overflow-y: auto;
   line-height: 1.5;
-  margin-bottom: 18px;
   word-break: break-all;
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+  flex-shrink: 0;
 }
 
 .cursor {
@@ -29,15 +30,3 @@
   }
 }
 
-@media (max-height: 700px) {
-  .qtext {
-    height: 78px;
-    margin-bottom: 14px;
-  }
-}
-
-@media (max-height: 610px) {
-  .qtext {
-    height: 58px;
-  }
-}

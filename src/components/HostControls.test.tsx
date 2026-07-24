@@ -24,7 +24,7 @@ function renderControls(scored = false) {
 describe('HostControls', () => {
   test('shows question hierarchy and keyboard hints', () => {
     renderControls();
-    expect(screen.getByRole('heading', { name: /問題/ })).toHaveTextContent('第 5 問');
+    expect(screen.getByText('第 5 問')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /正解 \[C\]/ })).toBeEnabled();
     expect(screen.getByRole('button', { name: /不正解 \[X\]/ })).toBeEnabled();
     expect(screen.getByRole('button', { name: /次の問題 \[\.\]/ })).toBeEnabled();

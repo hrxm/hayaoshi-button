@@ -46,10 +46,37 @@ export function HostControls({
 
   return (
     <div className={styles.panel}>
+      {/* 判定ブロックを先頭に配置：モバイルでもスクロールせず「誰が回答中か」と
+          正解/不正解ボタンが見えるようにする（ユーザーからの優先度フィードバック）。 */}
+      <div className={`${styles.buzzBox} ${buzz ? styles.active : ''}`}>
+        <div className={styles.buzzLabel}>
+          回答中 <span className={styles.qBadge}>第 {questionNumber} 問</span>
+        </div>
+        <div className={styles.buzzWho}>
+          {buzz ? `${buzz.emoji || ''} ${buzz.name} さん` : '― まだ誰も押していません ―'}
+        </div>
+      </div>
+      <div className={styles.judgeGrid}>
+        <button
+          className={styles.btnOk}
+          disabled={!buzz || questionScored}
+          onClick={() => onJudge('correct')}
+        >
+          {questionScored ? '採点済み' : `⭕ 正解 [C] ${buzz ? `+${activePoints}` : ''}`}
+        </button>
+        <button className={styles.btnNg} disabled={!buzz} onClick={() => onJudge('wrong')}>
+          ❌ 不正解 [X]
+        </button>
+      </div>
+      <button className={styles.btnCancel} disabled={!buzz} onClick={onCancel}>
+        ↩ キャンセル
+      </button>
+      <button className={styles.btnNext} onClick={next}>
+        ▶ 次の問題 [.]
+      </button>
+
       <div className={styles.questionHeading}>
-        <h3>
-          問題 <strong>第 {questionNumber} 問</strong>
-        </h3>
+        <h3>問題を出す</h3>
         <button
           className={styles.foldButton}
           type="button"
@@ -77,7 +104,7 @@ export function HostControls({
         />
         <span>点</span>
       </div>
-      <button className={styles.btnNext} onClick={ask}>
+      <button className={styles.btnAsk} onClick={ask}>
         📢 この問題を出す（流す）
       </button>
       {!questionFolded && (
@@ -86,31 +113,6 @@ export function HostControls({
           {qDisplayStreaming && <span className={styles.qDisplayCursor}>|</span>}
         </div>
       )}
-
-      <div className={`${styles.buzzBox} ${buzz ? styles.active : ''}`}>
-        <div className={styles.buzzLabel}>回答中</div>
-        <div className={styles.buzzWho}>
-          {buzz ? `${buzz.emoji || ''} ${buzz.name} さん` : '― まだ誰も押していません ―'}
-        </div>
-      </div>
-      <div className={styles.judgeRow}>
-        <button
-          className={styles.btnOk}
-          disabled={!buzz || questionScored}
-          onClick={() => onJudge('correct')}
-        >
-          {questionScored ? '採点済み' : `⭕ 正解 [C] ${buzz ? `+${activePoints}` : ''}`}
-        </button>
-        <button className={styles.btnNg} disabled={!buzz} onClick={() => onJudge('wrong')}>
-          ❌ 不正解 [X]
-        </button>
-        <button className={styles.btnCancel} disabled={!buzz} onClick={onCancel}>
-          ↩ キャンセル
-        </button>
-      </div>
-      <button className={styles.btnNext} onClick={next}>
-        ▶ 次の問題 [.]
-      </button>
     </div>
   );
 }

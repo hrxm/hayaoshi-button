@@ -7,12 +7,13 @@ import styles from './Scoreboard.module.css';
 interface ScoreboardProps {
   roomRef: DatabaseReference | null;
   players: PlayerRow[];
+  onKick: (playerId: string, playerName: string) => void;
 }
 
 const MEDALS = ['🥇', '🥈', '🥉'];
 
-// host.html の renderScoreboard を移植。得点ランキング + 手動±1調整。
-export function Scoreboard({ roomRef, players }: ScoreboardProps) {
+// host.html の renderScoreboard を移植。得点ランキング + 手動±1調整 + 退出。
+export function Scoreboard({ roomRef, players, onKick }: ScoreboardProps) {
   if (players.length === 0) {
     return <div className={styles.empty}>まだ誰も参加していません</div>;
   }
@@ -20,7 +21,7 @@ export function Scoreboard({ roomRef, players }: ScoreboardProps) {
   return (
     <div>
       {players.map((p, i) => (
-        <ScoreRow key={p.id} player={p} rank={i} roomRef={roomRef} />
+        <ScoreRow key={p.id} player={p} rank={i} roomRef={roomRef} onKick={onKick} />
       ))}
     </div>
   );
@@ -30,10 +31,12 @@ function ScoreRow({
   player,
   rank,
   roomRef,
+  onKick,
 }: {
   player: PlayerRow;
   rank: number;
   roomRef: DatabaseReference | null;
+  onKick: (playerId: string, playerName: string) => void;
 }) {
   const scoreRef = useChildRef(roomRef, 'players/' + player.id + '/score');
 
@@ -53,6 +56,14 @@ function ScoreRow({
         </button>
         <button title="+1" onClick={() => adjust(1)}>
           ＋
+        </button>
+        <button
+          className={styles.kick}
+          title="退出させる"
+          aria-label={`${player.name} さんを退出させる`}
+          onClick={() => onKick(player.id, player.name)}
+        >
+          ✕
         </button>
       </div>
       <div className={styles.sc}>{player.score || 0}</div>

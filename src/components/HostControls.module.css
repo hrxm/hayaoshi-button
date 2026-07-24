@@ -15,19 +15,15 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 14px;
+  margin: 22px 0 14px;
+  padding-top: 18px;
+  border-top: 1px solid var(--fg-10);
 }
 
 .questionHeading h3 {
   display: flex;
   align-items: baseline;
   gap: 12px;
-}
-
-.questionHeading strong {
-  color: var(--gold);
-  font-size: 27px;
-  letter-spacing: 0.04em;
 }
 
 .foldButton {
@@ -87,6 +83,7 @@
   text-align: center;
 }
 
+.btnAsk,
 .btnNext {
   width: 100%;
   border: none;
@@ -132,50 +129,58 @@
 
 .buzzBox {
   text-align: center;
-  padding: 24px;
+  padding: clamp(16px, 4vw, 24px);
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.03);
-  margin: 16px 0;
-  transition: all 0.3s;
+  margin-bottom: 12px;
+  transition: background 0.3s, border-color 0.3s;
 }
 
 .buzzBox.active {
   background: rgba(255, 213, 74, 0.12);
   border: 1px solid rgba(255, 213, 74, 0.4);
-  transform: scale(1.01);
 }
 
 .buzzLabel {
-  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 13px;
   color: var(--fg-45);
 }
 
+.qBadge {
+  color: var(--gold);
+  font-weight: 800;
+}
+
 .buzzWho {
-  font-size: 34px;
+  font-size: clamp(22px, 6vw, 34px);
   font-weight: 900;
   color: var(--gold);
   margin-top: 6px;
-  min-height: 42px;
+  min-height: 1.2em;
 }
 
-.judgeRow {
-  display: flex;
-  gap: 8px;
-  margin-top: 8px;
+.judgeGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
 }
 
-.judgeRow button {
-  flex: 1;
-  padding: 13px 6px;
-  font-size: 15px;
+.judgeGrid button {
+  min-height: 64px;
+  padding: 8px;
+  font-size: clamp(15px, 4vw, 18px);
   border: none;
-  border-radius: 12px;
+  border-radius: 14px;
   color: var(--fg);
   cursor: pointer;
   font-weight: 900;
 }
 
-.judgeRow button:disabled {
+.judgeGrid button:disabled {
   opacity: 0.4;
   cursor: default;
 }
@@ -191,10 +196,19 @@
 }
 
 .btnCancel {
+  width: 100%;
+  margin-top: 8px;
+  padding: 10px;
   background: rgba(255, 255, 255, 0.08);
-  border: 1px solid var(--fg-18) !important;
-  color: var(--fg-70) !important;
-  box-shadow: none;
+  border: 1px solid var(--fg-18);
+  border-radius: 12px;
+  color: var(--fg-70);
   font-size: 13px;
-  font-weight: 700 !important;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btnCancel:disabled {
+  opacity: 0.4;
+  cursor: default;
 }

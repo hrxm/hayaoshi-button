@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { applyPlayerRename, claimYajiTimestamp } from './playerState';
+import { applyPlayerRename, claimYajiTimestamp, findPlayerIdByName } from './playerState';
 import type { TransactionRoom } from './roomState';
 
 function room(): TransactionRoom {
@@ -36,5 +36,23 @@ describe('player room actions', () => {
   test('rejects empty and overlong player names', () => {
     expect(applyPlayerRename(room(), 'p1', '   ')).toBeNull();
     expect(applyPlayerRename(room(), 'p1', 'x'.repeat(21))).toBeNull();
+  });
+
+  test('finds an existing player id by exact name match for rejoin', () => {
+    const players = room().players!;
+    expect(findPlayerIdByName(players, 'Old')).toBe('p1');
+    expect(findPlayerIdByName(players, 'Other')).toBe('p2');
+  });
+
+  test('returns null when no player has that name', () => {
+    const players = room().players!;
+    expect(findPlayerIdByName(players, 'Nobody')).toBeNull();
+    expect(findPlayerIdByName({}, 'Old')).toBeNull();
+  });
+
+  test('name matching is case-sensitive and exact (no trim on stored names)', () => {
+    const players = room().players!;
+    expect(findPlayerIdByName(players, 'old')).toBeNull();
+    expect(findPlayerIdByName(players, ' Old ')).toBeNull();
   });
 });

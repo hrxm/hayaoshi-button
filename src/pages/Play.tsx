@@ -171,31 +171,33 @@ export function Play() {
         <div className={styles.room}>ROOM {code}</div>
       </div>
 
-      <div className={styles.questionHeading}>
-        <span>問題</span>
-        <strong>第 {qNum} 問</strong>
-      </div>
-      <div className={styles.scoreLine}>
-        あなたの得点：<b>{player?.score ?? 0}</b>
-      </div>
-      <QuestionStream text={qText} autoScroll />
-      <BuzzButton buzz={buzz} myPid={pid} onPress={onBuzzPress} />
-      <div className={`${styles.status} ${buzz ? styles.answering : ''}`}>
-        {isMine ? 'あなたが回答中！' : isLocked ? `${buzz?.emoji || ''} ${buzz?.name} さんが回答中` : ''}
-      </div>
-      {isMine && (
-        <button className={styles.cancelBuzz} onClick={cancelMyBuzz}>
-          回答をキャンセル
-        </button>
-      )}
-      <div className={styles.hint}>早く押した人だけが回答できるよ</div>
-      <div className={styles.utilityRow}>
-        <button className={styles.yajiBtn} disabled={yajiRemaining > 0} onClick={throwYaji}>
-          {yajiRemaining > 0 ? `ヤジはあと ${yajiRemaining} 秒` : '🗣️ ヤジを飛ばす'}
-        </button>
-        <button className={styles.soundBtn} onClick={togglePlayerSound}>
-          {playerSoundEnabled ? '🔊 音あり' : '🔇 ミュート'}
-        </button>
+      <div className={styles.middle}>
+        <div className={styles.questionHeading}>
+          <span>問題</span>
+          <strong>第 {qNum} 問</strong>
+        </div>
+        <div className={styles.scoreLine}>
+          あなたの得点：<b>{player?.score ?? 0}</b>
+        </div>
+        <QuestionStream text={qText} autoScroll />
+        <BuzzButton buzz={buzz} myPid={pid} onPress={onBuzzPress} />
+        <div className={`${styles.status} ${buzz ? styles.answering : ''}`}>
+          {isMine ? 'あなたが回答中！' : isLocked ? `${buzz?.emoji || ''} ${buzz?.name} さんが回答中` : ''}
+        </div>
+        {isMine && (
+          <button className={styles.cancelBuzz} onClick={cancelMyBuzz}>
+            回答をキャンセル
+          </button>
+        )}
+        <div className={styles.hint}>早く押した人だけが回答できるよ</div>
+        <div className={styles.utilityRow}>
+          <button className={styles.yajiBtn} disabled={yajiRemaining > 0} onClick={throwYaji}>
+            {yajiRemaining > 0 ? `ヤジはあと ${yajiRemaining} 秒` : '🗣️ ヤジを飛ばす'}
+          </button>
+          <button className={styles.soundBtn} onClick={togglePlayerSound}>
+            {playerSoundEnabled ? '🔊 音あり' : '🔇 ミュート'}
+          </button>
+        </div>
       </div>
 
       <ResultOverlay result={resultDisplay} />

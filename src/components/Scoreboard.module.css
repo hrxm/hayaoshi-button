@@ -1,8 +1,8 @@
 .row {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 11px 14px;
+  gap: clamp(4px, 2vw, 12px);
+  padding: 11px clamp(8px, 3vw, 14px);
   border-radius: 12px;
 }
 
@@ -11,19 +11,21 @@
 }
 
 .rank {
-  width: 26px;
+  width: 20px;
+  flex-shrink: 0;
   font-weight: 900;
   color: var(--fg-45);
   text-align: center;
 }
 
 .em {
-  font-size: 22px;
+  font-size: 20px;
+  flex-shrink: 0;
 }
 
 .nm {
   flex: 1;
-  min-width: 0; /* flexアイテムを実コンテンツ幅より縮められるようにし、長い名前を省略可能にする */
+  min-width: 24px; /* 最低限これだけは名前の一部が見えるようにする（0だと完全に消えてしまう） */
   font-weight: 700;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -31,20 +33,22 @@
 }
 
 .sc {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 900;
   color: var(--gold);
-  min-width: 34px;
+  min-width: 28px;
+  flex-shrink: 0;
   text-align: right;
 }
 
 .adj {
   display: flex;
-  gap: 6px;
+  gap: 4px;
+  flex-shrink: 0;
 }
 
 .adj button {
-  /* Apple HIGの推奨最小タップ領域(44x44)に合わせる。狭い画面でも誤タップを防ぐ */
+  /* Apple HIGの推奨最小タップ領域(44x44)を維持。狭い画面では代わりに名前表示を縮める */
   width: 44px;
   height: 44px;
   padding: 0;
@@ -54,6 +58,12 @@
   background: var(--fg-06);
   color: var(--fg);
   cursor: pointer;
+  flex-shrink: 0;
+}
+
+.kick {
+  color: #ff8a8a !important;
+  border-color: rgba(255, 82, 82, 0.25) !important;
 }
 
 .empty {

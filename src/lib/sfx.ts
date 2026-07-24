@@ -11,11 +11,15 @@ const SFX = {
 
 type SfxKey = keyof typeof SFX;
 
-// ヤジ（誰でもランダムに飛ばせる野次。回答中／出題中に使う）
+// ヤジ（誰でもランダムに飛ばせる野次。回答中／出題中に使う）。
+// 拍手（クラップ・チア）もこの配列にランダムバリエーションとして追加している
+// （専用ボタンではなく、既存のヤジボタン・クールダウンを共有する仕様）。
+// TODO(user): ブーイング音源が用意でき次第、この配列に追加する。
 export const YAJI_SFX = [
   '/sfx/yaji-Slide_Whistle01-5(Overtone-Up).mp3',
   '/sfx/yaji-Slide_Whistle01-6(Overtone-Down).mp3',
   '/sfx/yajiTambourine04-01(Hit-Hand).mp3',
+  '/sfx/Yeah - Cheer-Yay02-2(High-Short-Solo).mp3',
 ];
 
 const audioCache: Partial<Record<SfxKey, HTMLAudioElement>> = {};

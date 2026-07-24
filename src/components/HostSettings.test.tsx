@@ -13,6 +13,8 @@ test('host settings stay collapsed and expose only sound and yaji controls', asy
       yajiCooldownSeconds={10}
       onHostSoundChange={vi.fn()}
       onRoomSettingsChange={onRoomSettingsChange}
+      remoteCopied={false}
+      onCopyRemoteUrl={vi.fn()}
     />
   );
 

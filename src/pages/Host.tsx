@@ -20,6 +20,7 @@ import {
   applyCancelBuzz,
   applyCorrectJudgment,
   applyFullReset,
+  applyKickPlayer,
   applyNextQuestion,
   applyWrongJudgment,
   getBuzzToken,
@@ -215,6 +216,11 @@ function HostDashboard({ code }: { code: string }) {
     if (historyRef) set(historyRef, null);
   }
 
+  function kickPlayer(playerId: string, playerName: string) {
+    if (!confirm(`${playerName} さんを退出させますか？`)) return;
+    runRoomTransaction((current) => applyKickPlayer(current, playerId));
+  }
+
   function updateRoomSettings(next: Partial<RoomSettings>) {
     if (settingsRef) update(settingsRef, next);
   }
@@ -287,19 +293,6 @@ function HostDashboard({ code }: { code: string }) {
       ) : (
       <div className={styles.main}>
         <div>
-          <HostSettings
-            hostSoundEnabled={hostSoundEnabled}
-            defaultPlayerSound={roomSettings.defaultPlayerSound}
-            yajiCooldownSeconds={roomSettings.yajiCooldownSeconds}
-            onHostSoundChange={setHostSoundEnabled}
-            onRoomSettingsChange={updateRoomSettings}
-          />
-          <button
-            className={styles.remoteLink}
-            onClick={() => copyJoinUrl(remoteUrl, setRemoteCopied)}
-          >
-            {remoteCopied ? '✅ リモコンURLをコピー済み' : '📱 2台目用リモコンURLをコピー'}
-          </button>
           <div style={{ marginBottom: 16 }}>
             <HostControls
               buzz={buzz}
@@ -314,6 +307,16 @@ function HostDashboard({ code }: { code: string }) {
             />
           </div>
 
+          <HostSettings
+            hostSoundEnabled={hostSoundEnabled}
+            defaultPlayerSound={roomSettings.defaultPlayerSound}
+            yajiCooldownSeconds={roomSettings.yajiCooldownSeconds}
+            onHostSoundChange={setHostSoundEnabled}
+            onRoomSettingsChange={updateRoomSettings}
+            remoteCopied={remoteCopied}
+            onCopyRemoteUrl={() => copyJoinUrl(remoteUrl, setRemoteCopied)}
+          />
+
           <div className={styles.panel}>
             <div className={styles.historyHeader}>
               <h3>正解履歴</h3>
@@ -327,7 +330,7 @@ function HostDashboard({ code }: { code: string }) {
 
         <div className={styles.panel}>
           <h3>得点ランキング</h3>
-          <Scoreboard roomRef={roomRef} players={players} />
+          <Scoreboard roomRef={roomRef} players={players} onKick={kickPlayer} />
         </div>
       </div>
       )}
